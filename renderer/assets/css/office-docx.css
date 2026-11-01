@@ -1,0 +1,345 @@
+
+    #docxEditorRoot, #docxEditorRoot *{
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    #docxEditorRoot{
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #333;
+    }
+
+    #docxEditorRoot .container{
+      max-width: 1280px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    #docxEditorRoot header{
+      background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
+      color: white;
+      padding: 20px 30px;
+      text-align: center;
+    }
+
+    #docxEditorRoot h1{
+      font-size: 2.1rem;
+      margin-bottom: 8px;
+    }
+
+    #docxEditorRoot .subtitle{
+      font-size: 1.05rem;
+      opacity: 0.9;
+    }
+
+    #docxEditorRoot .instructions{
+      background: #e7f3ff;
+      border-left: 4px solid #4b6cb7;
+      padding: 16px 20px;
+      margin: 18px 30px;
+      border-radius: 0 8px 8px 0;
+    }
+
+    #docxEditorRoot .instructions h3{
+      margin-bottom: 8px;
+      color: #2c3e50;
+    }
+
+    #docxEditorRoot .instructions ol{
+      margin-left: 20px;
+    }
+
+    #docxEditorRoot .instructions li{
+      margin-bottom: 6px;
+    }
+
+    #docxEditorRoot .file-toolbar{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 30px;
+      background: #f8f9fa;
+      border-top: 1px solid #eaeaea;
+      border-bottom: 1px solid #eaeaea;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    #docxEditorRoot .toolbar-left, #docxEditorRoot .toolbar-right{
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    #docxEditorRoot .file-input-wrapper{
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+    }
+
+    #docxEditorRoot .file-input-wrapper input[type="file"], #docxEditorRoot #docx_imageInput{
+      position: absolute;
+      left: -9999px;
+      opacity: 0;
+    }
+
+    #docxEditorRoot .btn{
+      background: #4b6cb7;
+      color: white;
+      border: none;
+      padding: 9px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      white-space: nowrap;
+    }
+
+    #docxEditorRoot .btn:hover{
+      background: #3a5ca9;
+      transform: translateY(-1px);
+      box-shadow: 0 3px 7px rgba(0, 0, 0, 0.1);
+    }
+
+    #docxEditorRoot .btn:active{
+      transform: translateY(0);
+    }
+
+    #docxEditorRoot .btn-secondary{
+      background: #6c757d;
+    }
+
+    #docxEditorRoot .btn-secondary:hover{
+      background: #5a6268;
+    }
+
+    #docxEditorRoot .btn-success{
+      background: #28a745;
+    }
+
+    #docxEditorRoot .btn-success:hover{
+      background: #218838;
+    }
+
+    #docxEditorRoot .file-name{
+      font-style: italic;
+      color: #6c757d;
+      max-width: 360px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    #docxEditorRoot .rich-toolbar{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      padding: 14px 30px;
+      background: #ffffff;
+      border-bottom: 1px solid #e6e6e6;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    #docxEditorRoot .tool-group{
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding-right: 8px;
+      margin-right: 3px;
+      border-right: 1px solid #e0e0e0;
+    }
+
+    #docxEditorRoot .tool-group:last-child{
+      border-right: none;
+    }
+
+    #docxEditorRoot .tool-btn{
+      min-width: 34px;
+      height: 34px;
+      border: 1px solid #d0d7de;
+      background: #f6f8fa;
+      color: #24292f;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 9px;
+      transition: all 0.15s ease;
+    }
+
+    #docxEditorRoot .tool-btn:hover{
+      background: #eaeef2;
+      border-color: #afb8c1;
+    }
+
+    #docxEditorRoot .tool-btn.active{
+      background: #dbeafe;
+      border-color: #4b6cb7;
+      color: #1d4ed8;
+    }
+
+    #docxEditorRoot .tool-select, #docxEditorRoot .tool-input{
+      height: 34px;
+      border: 1px solid #d0d7de;
+      border-radius: 6px;
+      background: #fff;
+      padding: 0 8px;
+      color: #24292f;
+      outline: none;
+    }
+
+    #docxEditorRoot .tool-select:focus, #docxEditorRoot .tool-input:focus{
+      border-color: #4b6cb7;
+      box-shadow: 0 0 0 2px rgba(75, 108, 183, 0.15);
+    }
+
+    #docxEditorRoot .color-label{
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      height: 34px;
+      padding: 0 8px;
+      border: 1px solid #d0d7de;
+      border-radius: 6px;
+      background: #f6f8fa;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    #docxEditorRoot .color-label input[type="color"]{
+      width: 24px;
+      height: 24px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    #docxEditorRoot .editor-container{
+      padding: 30px;
+      min-height: 620px;
+      background: #f3f4f6;
+    }
+
+    #docxEditorRoot #docx_docx-container{
+      background: white;
+      min-height: 620px;
+      max-width: 900px;
+      margin: 0 auto;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 48px;
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+      line-height: 1.6;
+      outline: none;
+      overflow: auto;
+      word-break: break-word;
+    }
+
+    #docxEditorRoot #docx_docx-container:focus{
+      outline: 2px solid #4b6cb7;
+      outline-offset: 2px;
+    }
+
+    #docxEditorRoot #docx_docx-container p{
+      margin: 0 0 10px 0;
+    }
+
+    #docxEditorRoot #docx_docx-container h1, #docxEditorRoot #docx_docx-container h2, #docxEditorRoot #docx_docx-container h3, #docxEditorRoot #docx_docx-container h4, #docxEditorRoot #docx_docx-container h5, #docxEditorRoot #docx_docx-container h6{
+      margin: 14px 0 10px;
+      line-height: 1.35;
+    }
+
+    #docxEditorRoot #docx_docx-container ul, #docxEditorRoot #docx_docx-container ol{
+      margin-left: 26px;
+      margin-bottom: 10px;
+    }
+
+    #docxEditorRoot #docx_docx-container table{
+      border-collapse: collapse;
+      width: 100%;
+      margin: 12px 0;
+    }
+
+    #docxEditorRoot #docx_docx-container td, #docxEditorRoot #docx_docx-container th{
+      border: 1px solid #888;
+      padding: 7px;
+      min-width: 40px;
+    }
+
+    #docxEditorRoot #docx_docx-container img{
+      max-width: 100%;
+      height: auto;
+      display: inline-block;
+    }
+
+    #docxEditorRoot #docx_docx-container blockquote{
+      border-left: 4px solid #4b6cb7;
+      padding: 8px 14px;
+      margin: 12px 0;
+      background: #f5f7ff;
+      color: #384152;
+    }
+
+    #docxEditorRoot .placeholder{
+      text-align: center;
+      color: #6c757d;
+      margin-top: 220px !important;
+    }
+
+    #docxEditorRoot .status-bar{
+      padding: 10px 30px;
+      background: #f8f9fa;
+      border-top: 1px solid #eaeaea;
+      display: flex;
+      justify-content: space-between;
+      color: #6c757d;
+      font-size: 0.9rem;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    #docxEditorRoot .icon{
+      width: 18px;
+      height: 18px;
+    }
+
+    @media (max-width: 900px){
+      #docxEditorRoot .rich-toolbar{
+        padding: 12px 16px;
+      }
+
+      #docxEditorRoot .tool-group{
+        border-right: none;
+        padding-right: 0;
+      }
+
+      #docxEditorRoot .editor-container{
+        padding: 15px;
+      }
+
+      #docxEditorRoot #docx_docx-container{
+        padding: 24px;
+        min-height: 520px;
+      }
+    }
+  

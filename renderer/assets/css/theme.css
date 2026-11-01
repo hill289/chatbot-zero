@@ -1,0 +1,358 @@
+        :root {
+          --bg-primary: #f7f8fa;
+          --bg-card: #ffffff;
+          --bg-editor: #263238;
+          --bg-toolbar: #f0f2f5;
+          --border: #e2e6ea;
+          --text-primary: #1a1a2e;
+          --text-secondary: #666;
+          --text-muted: #999;
+          --accent: #4a9eff;
+          --accent-hover: #3a8eef;
+          --success: #22c55e;
+          --success-bg: #f0fdf4;
+          --error: #ef4444;
+          --error-bg: #fef2f2;
+          --warning: #eab308;
+          --warning-bg: #fefce8;
+          --table-header-bg: #f8f9fb;
+          --table-stripe: #fafbfc;
+          --table-hover: #eef2ff;
+          --shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
+          --shadow-md: 0 2px 8px rgba(0,0,0,0.08);
+          --radius: 8px;
+        }
+        #pgpyContainer * { margin: 0; padding: 0; box-sizing: border-box; }
+        #pgpyContainer {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+          background: var(--bg-primary);
+          color: var(--text-primary);
+          height: 60vh;
+          min-height: 300px;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          border-bottom: 2px solid var(--border);
+        }
+        #pgpyContainer .pgpy-header {
+          padding: 10px 20px;
+          background: var(--bg-card);
+          border-bottom: 1px solid var(--border);
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          flex-shrink: 0;
+        }
+        #pgpyContainer .pgpy-header-left {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+        #pgpyContainer .pgpy-header h2 {
+          font-size: 16px;
+          font-weight: 700;
+          color: var(--text-primary);
+        }
+        #pgpyContainer .pgpy-header .pgpy-subtitle {
+          font-size: 12px;
+          color: var(--text-muted);
+        }
+        #pgpyContainer .pgpy-status-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          padding: 3px 10px;
+          border-radius: 12px;
+          font-size: 11px;
+          font-weight: 600;
+        }
+        #pgpyContainer .pgpy-status-badge.pgpy-loading { background: var(--warning-bg); color: #92400e; }
+        #pgpyContainer .pgpy-status-badge.pgpy-success { background: var(--success-bg); color: #166534; }
+        #pgpyContainer .pgpy-status-badge.pgpy-error   { background: var(--error-bg); color: #991b1b; }
+        #pgpyContainer .pgpy-main-layout {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+        }
+        #pgpyContainer .pgpy-editor-panel {
+          display: flex;
+          flex-direction: column;
+          border-bottom: 2px solid var(--border);
+          min-height: 200px;
+          max-height: 45vh;
+          flex: 0 0 auto;
+          overflow: hidden;
+        }
+        #pgpyContainer .pgpy-editor-panel.pgpy-expanded { flex: 1; }
+        #pgpyContainer .pgpy-toolbar {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 6px 12px;
+          background: var(--bg-toolbar);
+          border-bottom: 1px solid var(--border);
+          flex-shrink: 0;
+          flex-wrap: wrap;
+        }
+        #pgpyContainer .pgpy-toolbar .pgpy-group { display: flex; align-items: center; gap: 3px; }
+        #pgpyContainer .pgpy-toolbar .pgpy-separator { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+        #pgpyContainer .pgpy-toolbar label { font-size: 11px; color: var(--text-muted); margin-right: 2px; }
+        #pgpyContainer .pgpy-toolbar .pgpy-spacer { flex: 1; }
+        #pgpyContainer .pgpy-btn {
+          display: inline-flex; align-items: center; gap: 5px;
+          padding: 5px 10px; border: 1px solid var(--border); border-radius: 5px;
+          background: var(--bg-card); color: var(--text-primary); font-size: 12px;
+          cursor: pointer; transition: all 0.15s; white-space: nowrap; line-height: 1.3;
+        }
+        #pgpyContainer .pgpy-btn:hover { background: #eef0f3; border-color: #ccc; }
+        #pgpyContainer .pgpy-btn:active { background: #e0e2e5; }
+        #pgpyContainer .pgpy-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        #pgpyContainer .pgpy-btn-primary { background: var(--accent); color: white; border-color: var(--accent); }
+        #pgpyContainer .pgpy-btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+        #pgpyContainer .pgpy-btn-primary:active { background: #2d7ed8; }
+        #pgpyContainer .pgpy-btn-run { background: #16a34a; color: white; border-color: #16a34a; font-weight: 600; }
+        #pgpyContainer .pgpy-btn-run:hover { background: #15803d; border-color: #15803d; }
+        #pgpyContainer .pgpy-btn-export { background: #059669; color: white; border-color: #059669; }
+        #pgpyContainer .pgpy-btn-export:hover { background: #047857; border-color: #047857; }
+        #pgpyContainer .pgpy-btn-icon { padding: 5px 7px; font-size: 14px; }
+        #pgpyContainer .pgpy-toolbar .pgpy-file-chip { display: inline-flex; align-items: center; gap: 4px; max-width: 320px; padding: 2px 8px; border: 1px solid #bbe7d0; background: #ecfdf5; color: #065f46; border-radius: 12px; font-size: 11px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        #pgpyContainer .pgpy-toolbar .pgpy-file-chip .pgpy-file-chip-clear { cursor: pointer; color: #059669; font-weight: 700; padding: 0 2px; border-radius: 50%; }
+        #pgpyContainer .pgpy-toolbar .pgpy-file-chip .pgpy-file-chip-clear:hover { color: var(--error); background: var(--error-bg); }
+
+        #pgpyContainer .pgpy-editor-container { flex: 1; min-height: 120px; overflow: auto; }
+        #pgpyContainer .pgpy-editor-container .CodeMirror { height: 100%; font-size: 13px; font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace; line-height: 1.5; }
+        #pgpyContainer .pgpy-results-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+        #pgpyContainer .pgpy-results-toolbar { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--bg-toolbar); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        #pgpyContainer .pgpy-results-toolbar .pgpy-label { font-size: 12px; color: var(--text-secondary); font-weight: 600; display: flex; align-items: center; gap: 5px; }
+        #pgpyContainer .pgpy-results-toolbar .pgpy-badge { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 11px; font-weight: 600; background: #e0e7ff; color: #3730a3; }
+        #pgpyContainer .pgpy-results-toolbar .pgpy-timing { font-size: 11px; color: var(--text-muted); }
+        #pgpyContainer .pgpy-results-toolbar .pgpy-spacer { flex: 1; }
+        #pgpyContainer .pgpy-results-message { padding: 12px 16px; font-size: 13px; color: var(--text-secondary); font-family: 'Cascadia Code', 'Fira Code', monospace; white-space: pre-wrap; overflow: auto; flex: 1; }
+        #pgpyContainer .pgpy-results-message.pgpy-error { color: var(--error); background: var(--error-bg); }
+        #pgpyContainer .pgpy-table-wrapper { flex: 1; overflow: auto; min-height: 0; }
+        #pgpyContainer .pgpy-results-table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: auto; }
+        #pgpyContainer .pgpy-results-table th { position: sticky; top: 0; background: var(--table-header-bg); padding: 7px 12px; text-align: left; font-weight: 600; color: var(--text-secondary); border-bottom: 2px solid var(--border); white-space: nowrap; z-index: 1; user-select: none; cursor: pointer; }
+        #pgpyContainer .pgpy-results-table th:hover { background: #eceef1; }
+        #pgpyContainer .pgpy-results-table td { padding: 5px 12px; border-bottom: 1px solid #f0f0f0; white-space: nowrap; max-width: 400px; overflow: hidden; text-overflow: ellipsis; }
+        #pgpyContainer .pgpy-results-table tr:nth-child(even) { background: var(--table-stripe); }
+        #pgpyContainer .pgpy-results-table tr:hover td { background: var(--table-hover); }
+        #pgpyContainer .pgpy-results-table td.pgpy-null { color: #bbb; font-style: italic; }
+        #pgpyContainer .pgpy-results-table td.pgpy-num { text-align: right; font-variant-numeric: tabular-nums; }
+        /* 点击表头排序：可排序列 pointer 手型 + 当前排序列高亮；勾选/删除列不可排序 */
+        #pgpyContainer .pgpy-results-table th.pgpy-sortable-th { cursor: pointer; }
+        #pgpyContainer .pgpy-results-table th.pgpy-sorted { color: var(--accent); }
+        #pgpyContainer .pgpy-results-table th.pgpy-nosort { cursor: default; }
+        #pgpyContainer .pgpy-results-table th.pgpy-nosort:hover { background: var(--table-header-bg); }
+        #pgpyContainer .pgpy-results-empty { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 13px; flex-direction: column; gap: 6px; }
+        #pgpyContainer .pgpy-results-empty .pgpy-icon { font-size: 28px; opacity: 0.3; }
+        /* Drag & drop 上传高亮：拖放文件/文件夹到 Results Panel 时显示 */
+        #pgpyContainer .pgpy-results-panel { position: relative; }
+        #pgpyContainer .pgpy-results-panel.pgpy-drag-over::after {
+            content: '📂 松开鼠标上传文件/文件夹到工作区  ·  Drop to upload';
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(74, 158, 255, 0.10);
+            border: 2px dashed #4a9eff;
+            box-sizing: border-box;
+            color: #1d4ed8;
+            font-weight: 700;
+            font-size: 15px;
+            text-align: center;
+            padding: 10px;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        #pgpyContainer .pgpy-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        #pgpyContainer .pgpy-modal-overlay.pgpy-hidden { display: none; }
+        #pgpyContainer .pgpy-modal { background: var(--bg-card); border-radius: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.18); width: 620px; max-height: 75vh; display: flex; flex-direction: column; }
+        #pgpyContainer .pgpy-modal-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+        #pgpyContainer .pgpy-modal-header h3 { font-size: 15px; font-weight: 600; }
+        #pgpyContainer .pgpy-modal-close { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--text-muted); padding: 4px 8px; border-radius: 4px; }
+        #pgpyContainer .pgpy-modal-close:hover { background: #f0f0f0; color: var(--text-primary); }
+        #pgpyContainer .pgpy-modal-body { flex: 1; overflow-y: auto; padding: 12px 18px; }
+        #pgpyContainer .pgpy-history-item { padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 8px; cursor: pointer; transition: border-color 0.15s, background 0.15s; position: relative; }
+        #pgpyContainer .pgpy-history-item:hover { border-color: var(--accent); background: #f0f7ff; }
+        #pgpyContainer .pgpy-history-item .pgpy-idx { font-size: 10px; color: var(--text-muted); margin-bottom: 3px; }
+        #pgpyContainer .pgpy-history-item pre { font-size: 12px; font-family: 'Cascadia Code', 'Fira Code', monospace; white-space: pre-wrap; word-break: break-all; color: var(--text-primary); max-height: 60px; overflow: hidden; }
+        #pgpyContainer .pgpy-history-item .pgpy-delete-btn { position: absolute; top: 8px; right: 8px; background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 13px; padding: 2px 6px; border-radius: 3px; opacity: 0; transition: opacity 0.15s; }
+        #pgpyContainer .pgpy-history-item:hover .pgpy-delete-btn { opacity: 1; }
+        #pgpyContainer .pgpy-history-item .pgpy-delete-btn:hover { color: var(--error); background: var(--error-bg); }
+        #pgpyContainer .pgpy-modal-footer { padding: 10px 18px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        #pgpyContainer .pgpy-modal-footer .pgpy-count { font-size: 12px; color: var(--text-muted); }
+        #pgpyContainer .pgpy-resize-handle { height: 4px; cursor: row-resize; background: transparent; transition: background 0.15s; flex-shrink: 0; }
+        #pgpyContainer .pgpy-resize-handle:hover, #pgpyContainer .pgpy-resize-handle.pgpy-active { background: var(--accent); }
+        /* File content preview */
+        #pgpyContainer .pgpy-filemodal-path { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; word-break: break-all; }
+        #pgpyContainer .pgpy-content-code { font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace; font-size: 12px; line-height: 1.55; white-space: pre-wrap; word-break: break-all; overflow: auto; max-height: 55vh; background: #f5f7fa; padding: 12px 14px; border-radius: 6px; border: 1px solid var(--border); margin: 0; }
+        #pgpyContainer .pgpy-file-row { cursor: pointer; }
+        #pgpyContainer .pgpy-file-row:hover td { background: #dbeafe !important; }
+        /* 待同步的文件行：写入=橙色底、待删除=红色底（供勾选后点「同步」写回） */
+        #pgpyContainer .pgpy-file-row.pgpy-pending-write td { background: #fff7ed; }
+        #pgpyContainer .pgpy-file-row.pgpy-pending-delete td { background: #fef2f2; }
+        #pgpyContainer .pgpy-file-row.pgpy-pending-delete td:nth-child(2) { color: #b91c1c; text-decoration: line-through; }
+        @media (max-width: 768px) {
+          #pgpyContainer { height: auto; min-height: 60vh; max-height: 85vh; }
+          #pgpyContainer .pgpy-toolbar { gap: 4px; }
+          #pgpyContainer .pgpy-btn span.pgpy-label-text { display: none; }
+          #pgpyContainer .pgpy-editor-panel { min-height: 120px; }
+          #pgpyContainer .pgpy-editor-panel .pgpy-toolbar { flex-wrap: wrap; gap: 2px; padding: 4px 6px; }
+          #pgpyContainer .pgpy-editor-container { min-height: 60px; }
+          #pgpyContainer .pgpy-results-panel { min-height: 150px; }
+          #pgpyContainer .pgpy-results-toolbar { padding: 4px 8px; }
+          #pgpyContainer .pgpy-header { padding: 6px 10px; }
+          #pgpyContainer .pgpy-header h2 { font-size: 14px; }
+          #pgpyContainer .pgpy-header .pgpy-subtitle { display: none; }
+          #pgpyContainer .pgpy-table-wrapper { overflow: auto; -webkit-overflow-scrolling: touch; }
+        }
+
+        /* ═══════════ 文件比较（Beyond Compare 风格） ═══════════ */
+        /* 文件行内的「⇄ 对比」入口（有待同步改动时才出现） */
+        #pgpyContainer .pgpy-diff-link {
+            background: #eef2ff;
+            border: 1px solid #c7d2fe;
+            color: #4338ca;
+            border-radius: 4px;
+            font-size: 11px;
+            line-height: 1;
+            padding: 2px 5px;
+            cursor: pointer;
+            vertical-align: middle;
+        }
+        #pgpyContainer .pgpy-diff-link:hover { background: #e0e7ff; border-color: #a5b4fc; }
+
+        /* 文件行内的 🗑 删除按钮（Query Results 每一行） */
+        #pgpyContainer .pgpy-file-del {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #b91c1c;
+            border-radius: 4px;
+            font-size: 11px;
+            line-height: 1;
+            padding: 2px 6px;
+            cursor: pointer;
+            vertical-align: middle;
+        }
+        #pgpyContainer .pgpy-file-del:hover { background: #fee2e2; border-color: #fca5a5; }
+        #pgpyContainer th.pgpy-row-actions, #pgpyContainer td.pgpy-row-actions { width: 48px; }
+
+        #diffModal .diff-card { width: 1240px; max-width: 96vw; display: flex; flex-direction: column; }
+        #diffModal .diff-toolbar {
+            display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+            padding: 8px 16px; border-bottom: 1px solid #e5e7eb; background: #f8fafc;
+        }
+        /* 对比弹窗内「待同步文件」勾选清单：在弹窗里直接勾选并一键同步 */
+        #diffModal .diff-sync-panel { border-bottom: 1px solid #e5e7eb; background: #fbfcfe; }
+        #diffModal .diff-sync-head {
+            display: flex; align-items: center; gap: 10px; padding: 6px 16px;
+            font-size: 12px; color: #334155;
+        }
+        #diffModal .diff-sync-title b { color: #b45309; }
+        #diffModal .diff-sync-spacer { flex: 1; }
+        #diffModal .diff-sync-list {
+            max-height: 108px; overflow: auto; padding: 0 16px 8px;
+            display: flex; flex-direction: column; gap: 1px;
+        }
+        #diffModal .diff-sync-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #334155; padding: 1px 0; }
+        #diffModal .diff-sync-item .diff-sync-kind { flex-shrink: 0; }
+        #diffModal .diff-sync-item .diff-sync-open {
+            cursor: pointer; color: #4338ca; min-width: 0;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        #diffModal .diff-sync-item .diff-sync-open:hover { text-decoration: underline; }
+        #diffModal .diff-sync-item.is-current .diff-sync-open { font-weight: 600; }
+        #diffModal .ds-mini {
+            border: 1px solid #cbd5e1; background: #fff; color: #475569; font-size: 11px;
+            padding: 2px 6px; border-radius: 4px; cursor: pointer;
+        }
+        #diffModal .ds-mini:hover { background: #f1f5f9; }
+        #diffModal .diff-select {
+            max-width: 340px; padding: 4px 8px; font-size: 12px; border: 1px solid #cbd5e1;
+            border-radius: 4px; background: #fff; color: #0f172a;
+        }
+        #diffModal .diff-modes { display: inline-flex; }
+        #diffModal .diff-mode-btn {
+            border: 1px solid #cbd5e1; background: #fff; color: #334155; font-size: 12px;
+            padding: 4px 10px; cursor: pointer;
+        }
+        #diffModal .diff-mode-btn:first-child { border-radius: 4px 0 0 4px; }
+        #diffModal .diff-mode-btn:last-child { border-radius: 0 4px 4px 0; border-left: none; }
+        #diffModal .diff-mode-btn.active { background: #1867C0; border-color: #1867C0; color: #fff; }
+        #diffModal .diff-opt { font-size: 12px; color: #334155; display: inline-flex; align-items: center; gap: 4px; }
+        #diffModal .diff-stats { margin-left: auto; font-family: 'Cascadia Code', 'Consolas', monospace; font-size: 12px; white-space: nowrap; }
+        #diffModal .diff-stat-add { color: #15803d; font-weight: 600; }
+        #diffModal .diff-stat-del { color: #b91c1c; font-weight: 600; }
+        #diffModal .diff-stat-mod { color: #b45309; font-weight: 600; }
+        #diffModal .diff-filebar {
+            display: flex; padding: 6px 16px; gap: 18px; font-size: 12px;
+            border-bottom: 1px solid #e5e7eb; background: #fff;
+        }
+        #diffModal .diff-filebar .dl { color: #64748b; display: inline-flex; align-items: center; gap: 6px; }
+        #diffModal .diff-filebar .dl b { color: #0f172a; font-weight: 600; }
+        #diffModal .diff-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+        #diffModal .diff-dot-l { background: #ef4444; }
+        #diffModal .diff-dot-r { background: #22c55e; }
+        #diffModal .diff-panes { flex: 1; overflow: auto; max-height: 64vh; background: #fff; }
+        #diffModal .diff-table {
+            border-collapse: collapse; width: 100%; table-layout: fixed;
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 12px; line-height: 1.5;
+        }
+        #diffModal .diff-table td { padding: 0 6px; vertical-align: top; white-space: pre-wrap; word-break: break-word; }
+        #diffModal .dln { color: #94a3b8; text-align: right; background: #f8fafc; border-right: 1px solid #eef2f7; user-select: none; width: 44px; }
+        #diffModal .dcode { color: #0f172a; }
+        #diffModal .d-equal .dcode { color: #64748b; }
+        #diffModal .d-del .dcode, #diffModal .d-del .dln { background: #fef2f2; }
+        #diffModal .d-add .dcode, #diffModal .d-add .dln { background: #f0fdf4; }
+        #diffModal .d-mod .dcode { background: #fff7ed; }
+        #diffModal .diff-wd { background: #fca5a5; border-radius: 2px; }
+        #diffModal .d-add .diff-wd { background: #86efac; }
+        #diffModal .d-mod .diff-wd { background: #fdba74; }
+        #diffModal .dgap td { background: #f1f5f9; color: #64748b; text-align: center; font-family: sans-serif; font-size: 11px; padding: 3px 0; }
+        #diffModal .urow.u-del .dcode, #diffModal .urow.u-del .dln { background: #fef2f2; }
+        #diffModal .urow.u-ins .dcode, #diffModal .urow.u-ins .dln { background: #f0fdf4; }
+        #diffModal .urow.u-del .d-sign { color: #b91c1c; }
+        #diffModal .urow.u-ins .d-sign { color: #15803d; }
+        #diffModal .d-sign { display: inline-block; width: 10px; color: #94a3b8; }
+        #diffModal .diff-current td { box-shadow: inset 0 0 0 9999px rgba(245, 158, 11, 0.10); }
+        #diffModal .diff-binary { padding: 40px; text-align: center; color: #b45309; font-size: 14px; }
+        #diffModal .diff-empty { padding: 40px; text-align: center; color: #94a3b8; font-size: 14px; }
+
+        /* ── 块级接受（hunk accept）＋ 交付说明面板 ───────────────────── */
+        #diffModal .diff-hunkbar {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding-left: 10px; margin-left: 6px; border-left: 1px solid #e2e8f0;
+            font-size: 12px; color: #334155;
+        }
+        #diffModal .diff-hunkbar .dh-label { color: #64748b; }
+        #diffModal .diff-hunkbar b { font-family: 'Cascadia Code', 'Consolas', monospace; }
+        #diffModal .dh-ok { color: #15803d; }
+        #diffModal .dh-part { color: #b45309; }
+        #diffModal .dh-none { color: #b91c1c; }
+        #diffModal td.dchk { width: 26px; text-align: center; background: #fbfcfe; border-right: 1px solid #eef2f7; padding: 0 !important; }
+        #diffModal td.dchk input { cursor: pointer; width: 13px; height: 13px; margin: 0; accent-color: #1867C0; }
+        /* 未接受的块：整块压暗 + 左侧红条，表示「不会写回磁盘」 */
+        #diffModal tr.d-rejected > td { opacity: .48; }
+        #diffModal tr.d-rejected > td.dchk { opacity: 1; background: #fff7ed; }
+        #diffModal tr.d-rejected > td.dln:first-child,
+        #diffModal tr.d-rejected > td.dchk + td.dln { box-shadow: inset 3px 0 0 #f59e0b; }
+        #diffModal .diff-deliver { border-bottom: 1px solid #e5e7eb; background: #fbfcfe; }
+        #diffModal .diff-deliver-head {
+            display: flex; align-items: center; gap: 8px; padding: 5px 16px; font-size: 12px; color: #334155;
+        }
+        #diffModal .diff-deliver-head .dd-title { font-weight: 600; flex-shrink: 0; }
+        #diffModal .diff-deliver-head .dd-summary { color: #b45309; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        #diffModal .diff-deliver-head .dd-spacer { flex: 1; }
+        #diffModal .diff-deliver-body {
+            margin: 0; padding: 0 16px 10px; max-height: 168px; overflow: auto;
+            font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
+            font-size: 11.5px; line-height: 1.6; color: #334155; white-space: pre-wrap; word-break: break-word;
+        }
+        #diffModal .diff-deliver.is-collapsed .diff-deliver-body { display: none; }
+        #diffModal .diff-deliver.is-warn { background: #fffbeb; }
+        #diffModal .diff-deliver.is-blocked { background: #fef2f2; }
+        #diffModal .diff-deliver.is-blocked .dd-title { color: #b91c1c; }

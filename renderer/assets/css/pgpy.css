@@ -1,0 +1,88 @@
+        /* 顶部 LSP 状态徽标 */
+        #pgpyContainer .pgpy-header-right { display: flex; align-items: center; gap: 8px; }
+        #pgpyContainer .pgpy-lsp-status { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; white-space: nowrap; user-select: none; }
+        #pgpyContainer .pgpy-lsp-status.pgpy-lsp-idle { background: #f1f5f9; color: #475569; }
+        #pgpyContainer .pgpy-lsp-status.pgpy-lsp-loading { background: var(--warning-bg); color: #92400e; }
+        #pgpyContainer .pgpy-lsp-status.pgpy-lsp-ok { background: var(--success-bg); color: #166534; }
+        #pgpyContainer .pgpy-lsp-status.pgpy-lsp-warning { background: var(--warning-bg); color: #92400e; }
+        #pgpyContainer .pgpy-lsp-status.pgpy-lsp-error { background: var(--error-bg); color: #991b1b; }
+        /* 诊断 gutter（圆点） */
+        .CodeMirror-gutter.pgpy-lsp-gutter { width: 12px; }
+        .CodeMirror .pgpy-lsp-gutter-dot { display: block; text-align: center; font-size: 11px; line-height: 1.5; cursor: default; }
+        .CodeMirror .pgpy-lsp-gutter-dot.is-error { color: #e5484d; }
+        .CodeMirror .pgpy-lsp-gutter-dot.is-warning { color: #d97706; }
+        .CodeMirror .pgpy-lsp-gutter-dot.is-info { color: #2563eb; }
+        /* 波浪下划线 */
+        .CodeMirror .pgpy-lsp-underline { text-decoration: underline wavy #e5484d; text-decoration-skip-ink: none; text-underline-offset: 2px; }
+        .CodeMirror .pgpy-lsp-underline.pgpy-lsp-warning { text-decoration-color: #d97706; }
+        .CodeMirror .pgpy-lsp-underline.pgpy-lsp-info { text-decoration-color: #2563eb; }
+        /* 悬浮提示气泡 */
+        .pgpy-lsp-tooltip { position: fixed; z-index: 100000; max-width: 560px; max-height: 340px; overflow: auto; padding: 8px 10px; background: #1e1e2e; color: #e6e6f0; border: 1px solid #3a3a4a; border-radius: 6px; font-size: 12px; line-height: 1.5; font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace; box-shadow: 0 8px 24px rgba(0,0,0,.35); pointer-events: none; }
+        .pgpy-lsp-tooltip .pgpy-lsp-tt-item { margin: 3px 0; white-space: pre-wrap; }
+        .pgpy-lsp-tooltip .pgpy-lsp-tt-item.err { color: #ff9b9b; }
+        .pgpy-lsp-tooltip .pgpy-lsp-tt-item.warn { color: #ffd28a; }
+        .pgpy-lsp-tooltip .pgpy-lsp-tt-item.info { color: #9bd0ff; }
+        .pgpy-lsp-tooltip .pgpy-lsp-tt-pre { margin: 0; white-space: pre-wrap; color: #dcdcdc; font-family: inherit; }
+
+        /* ═══════════ 工具调用轨迹回放（Tool Trace Replay） ═══════════ */
+        #traceModal .modal-card { width: 1120px; }
+        #traceModal .modal-body { padding: 0; }
+        .trace-wrap { display: flex; flex-direction: column; }
+        .trace-toolbar {
+            display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+            padding: 10px 16px; border-bottom: 1px solid #e5e7eb; background: #fafbfc;
+        }
+        .trace-btn {
+            border: 1px solid #d0d7de; background: #fff; color: #24292f; border-radius: 6px;
+            padding: 5px 10px; font-size: 13px; line-height: 1.2; cursor: pointer;
+            transition: background .15s, border-color .15s, color .15s;
+        }
+        .trace-btn:hover { background: #f3f4f6; }
+        .trace-btn:disabled { opacity: .45; cursor: not-allowed; }
+        .trace-btn.primary { background: #1867C0; border-color: #1867C0; color: #fff; }
+        .trace-btn.primary:hover { background: #1557a8; }
+        .trace-progress {
+            flex: 1 1 140px; min-width: 120px; height: 6px; border-radius: 3px;
+            background: #e5e7eb; overflow: hidden; cursor: pointer;
+        }
+        .trace-progress > i { display: block; height: 100%; width: 0; background: #1867C0; transition: width .12s linear; }
+        .trace-clock { font-size: 12px; color: #57606a; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .trace-speed { font-size: 12px; color: #57606a; white-space: nowrap; }
+        .trace-speed select { font-size: 12px; padding: 3px 4px; border: 1px solid #d0d7de; border-radius: 5px; background: #fff; }
+        .trace-sync { font-size: 12px; color: #57606a; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; user-select: none; white-space: nowrap; }
+        .trace-head {
+            display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+            padding: 8px 16px; border-bottom: 1px solid #eef1f4; font-size: 12px; color: #57606a;
+        }
+        .trace-chip { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; border-radius: 999px; background: #eef2ff; color: #3730a3; font-weight: 600; }
+        .trace-chip.ok { background: #ecfdf5; color: #047857; }
+        .trace-chip.err { background: #fef2f2; color: #b91c1c; }
+        .trace-cols { display: flex; min-height: 320px; max-height: 62vh; }
+        .trace-list { flex: 1 1 58%; overflow: auto; border-right: 1px solid #e5e7eb; padding: 8px 10px; }
+        .trace-detail { flex: 1 1 42%; overflow: auto; padding: 12px 16px; background: #fbfcfe; }
+        .tr-row {
+            display: grid; grid-template-columns: 34px 1fr 88px 66px; align-items: center; gap: 8px;
+            padding: 5px 6px; border-radius: 6px; cursor: pointer; border: 1px solid transparent;
+        }
+        .tr-row:hover { background: #f5f8fd; }
+        .tr-row.active { background: #e8f1fb; border-color: #1867C0; }
+        .tr-seq { font-size: 11px; color: #94a3b8; text-align: right; font-variant-numeric: tabular-nums; }
+        .tr-name { font-size: 13px; color: #24292f; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .tr-name .tr-sub { font-weight: 400; color: #94a3b8; font-size: 11px; margin-left: 6px; }
+        .tr-gantt { position: relative; height: 12px; background: #eef1f4; border-radius: 6px; overflow: hidden; }
+        .tr-gantt > i { position: absolute; top: 0; height: 100%; border-radius: 6px; background: #3b82f6; min-width: 3px; }
+        .tr-row.err .tr-gantt > i { background: #ef4444; }
+        .tr-row.running .tr-gantt > i { background: #f59e0b; }
+        .tr-dur { font-size: 11px; color: #57606a; text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .tr-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; display: inline-block; margin-right: 4px; }
+        .tr-row.err .tr-dot { background: #ef4444; }
+        .tr-row.running .tr-dot { background: #f59e0b; }
+        .trace-detail h4 { margin: 0 0 6px; font-size: 13px; color: #24292f; }
+        .trace-detail .td-sec { margin-bottom: 14px; }
+        .trace-detail .td-meta { font-size: 12px; color: #57606a; margin-bottom: 12px; line-height: 1.7; }
+        .trace-detail pre {
+            margin: 0; padding: 8px 10px; background: #0f172a; color: #e2e8f0; border-radius: 6px;
+            font-size: 12px; line-height: 1.5; white-space: pre-wrap; word-break: break-word;
+            max-height: 220px; overflow: auto; font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace;
+        }
+        .trace-empty { color: #94a3b8; text-align: center; padding: 48px 16px; font-size: 13px; }

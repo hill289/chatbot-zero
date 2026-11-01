@@ -1,0 +1,147 @@
+/*!
+ * plan-mode.css — Plan 模式（Ask/Plan/Craft）步骤卡面板 + 编辑弹窗
+ * 作用域前缀统一 pm-；不覆盖既有 .plan-bar 基础布局，仅做增强。
+ */
+
+/* ── 顶部增强面板（挂在既有 #planBar 容器内）── */
+.plan-bar.pm-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 12px;
+}
+
+.pm-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.pm-modes { display: inline-flex; gap: 4px; }
+.pm-chip {
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: transparent;
+    color: inherit;
+    border-radius: 999px;
+    padding: 1px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    opacity: 0.65;
+    transition: all .12s ease;
+}
+.pm-chip:hover { opacity: 1; }
+.pm-chip.on {
+    opacity: 1;
+    background: #2f6feb;
+    border-color: #2f6feb;
+    color: #fff;
+}
+
+.pm-progress { font-variant-numeric: tabular-nums; opacity: .85; }
+.pm-track {
+    display: inline-block;
+    width: 90px;
+    height: 5px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.12);
+    overflow: hidden;
+}
+.pm-track > i { display: block; height: 100%; background: #3fb950; transition: width .2s ease; }
+
+.pm-obj {
+    max-width: 40%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    opacity: .85;
+}
+
+.pm-head .spacer { flex: 1; }
+.pm-btn {
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.04);
+    color: inherit;
+    border-radius: 6px;
+    padding: 2px 9px;
+    font-size: 11px;
+    cursor: pointer;
+}
+.pm-btn:hover { background: rgba(255, 255, 255, 0.1); }
+.pm-btn.danger:hover { background: rgba(255, 90, 90, 0.2); border-color: #ff7b72; }
+
+/* ── 步骤列表 ── */
+.pm-steps { display: flex; flex-direction: column; gap: 3px; max-height: 220px; overflow: auto; }
+.pm-step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 6px;
+    border-radius: 6px;
+    border-left: 3px solid transparent;
+}
+.pm-step:hover { background: rgba(255, 255, 255, 0.04); }
+.pm-step.pending { border-left-color: rgba(255, 255, 255, 0.25); opacity: .85; }
+.pm-step.in_progress { border-left-color: #2f6feb; background: rgba(47, 111, 235, 0.10); }
+.pm-step.completed { border-left-color: #3fb950; opacity: .8; }
+.pm-step.skipped { border-left-color: #8b949e; opacity: .6; text-decoration: line-through; }
+.pm-step.failed { border-left-color: #ff7b72; background: rgba(255, 123, 114, 0.08); }
+.pm-step.blocked { border-left-color: #d29922; background: rgba(210, 153, 34, 0.08); }
+
+.pm-mark { width: 16px; text-align: center; cursor: pointer; }
+.pm-text { flex: 1; cursor: pointer; }
+.pm-note { opacity: .7; margin-left: 6px; font-style: italic; }
+
+.pm-badge {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 0 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    background: rgba(255, 255, 255, 0.1);
+}
+.pm-badge.risk { background: rgba(210, 153, 34, 0.25); color: #ffd479; }
+.pm-badge.tool { background: rgba(47, 111, 235, 0.22); }
+.pm-badge.art { background: rgba(63, 185, 80, 0.2); }
+
+.pm-ops { display: inline-flex; gap: 2px; opacity: 0; transition: opacity .1s; }
+.pm-step:hover .pm-ops { opacity: 1; }
+.pm-mini {
+    border: none;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    font-size: 11px;
+    padding: 0 4px;
+    opacity: .7;
+}
+.pm-mini:hover { opacity: 1; }
+
+.pm-empty { opacity: .6; padding: 4px 6px; }
+
+/* ── 编辑弹窗 ── */
+.pm-editor-overlay { z-index: 9999; }
+.pm-editor .modal-body { display: flex; flex-direction: column; gap: 10px; min-width: 620px; max-width: 88vw; }
+.pm-field { display: flex; flex-direction: column; gap: 4px; font-size: 12px; opacity: .9; }
+.pm-input, .pm-select {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    color: inherit;
+    padding: 5px 8px;
+    font-size: 12px;
+}
+.pm-ed-steps { display: flex; flex-direction: column; gap: 6px; max-height: 46vh; overflow: auto; }
+.pm-ed-row { display: flex; align-items: center; gap: 6px; }
+.pm-ed-row .pm-ed-content { flex: 1; }
+.pm-ed-ops { display: inline-flex; gap: 2px; }
+.pm-hint { font-size: 11px; opacity: .8; min-height: 14px; }
+
+@media (max-width: 640px) {
+    .pm-editor .modal-body { min-width: auto; }
+    .pm-ed-row { flex-wrap: wrap; }
+}

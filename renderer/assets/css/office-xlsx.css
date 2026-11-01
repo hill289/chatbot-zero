@@ -1,0 +1,475 @@
+
+    #xlsxEditorRoot, #xlsxEditorRoot *{
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    #xlsxEditorRoot{
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #333;
+    }
+
+    #xlsxEditorRoot .container{
+      max-width: 1600px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    #xlsxEditorRoot header{
+      background: linear-gradient(90deg, #217346 0%, #134e32 100%);
+      color: white;
+      padding: 20px 30px;
+      text-align: center;
+    }
+
+    #xlsxEditorRoot h1{
+      font-size: 2.1rem;
+      margin-bottom: 8px;
+    }
+
+    #xlsxEditorRoot .subtitle{
+      font-size: 1.05rem;
+      opacity: 0.9;
+    }
+
+    #xlsxEditorRoot .instructions{
+      background: #edf8f1;
+      border-left: 4px solid #217346;
+      padding: 16px 20px;
+      margin: 18px 30px;
+      border-radius: 0 8px 8px 0;
+    }
+
+    #xlsxEditorRoot .instructions h3{
+      margin-bottom: 8px;
+      color: #1b4332;
+    }
+
+    #xlsxEditorRoot .instructions ol{
+      margin-left: 20px;
+    }
+
+    #xlsxEditorRoot .instructions li{
+      margin-bottom: 6px;
+    }
+
+    /* =========================
+       文件工具栏
+       ========================= */
+
+    #xlsxEditorRoot .file-toolbar{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 30px;
+      background: #f8f9fa;
+      border-top: 1px solid #eaeaea;
+      border-bottom: 1px solid #eaeaea;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    #xlsxEditorRoot .toolbar-left, #xlsxEditorRoot .toolbar-right{
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    #xlsxEditorRoot .file-input-wrapper{
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+    }
+
+    #xlsxEditorRoot .file-input-wrapper input[type="file"]{
+      position: absolute;
+      left: -9999px;
+      opacity: 0;
+    }
+
+    #xlsxEditorRoot .btn{
+      background: #217346;
+      color: white;
+      border: none;
+      padding: 9px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      white-space: nowrap;
+    }
+
+    #xlsxEditorRoot .btn:hover{
+      background: #185c37;
+      transform: translateY(-1px);
+      box-shadow: 0 3px 7px rgba(0, 0, 0, 0.1);
+    }
+
+    #xlsxEditorRoot .btn-secondary{
+      background: #6c757d;
+    }
+
+    #xlsxEditorRoot .btn-secondary:hover{
+      background: #5a6268;
+    }
+
+    #xlsxEditorRoot .btn-success{
+      background: #28a745;
+    }
+
+    #xlsxEditorRoot .btn-success:hover{
+      background: #218838;
+    }
+
+    #xlsxEditorRoot .file-name{
+      font-style: italic;
+      color: #6c757d;
+      max-width: 360px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    /* =========================
+       Excel 工具栏
+       ========================= */
+
+    #xlsxEditorRoot .rich-toolbar{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      padding: 14px 30px;
+      background: #fff;
+      border-bottom: 1px solid #e6e6e6;
+      position: sticky;
+      top: 0;
+      z-index: 30;
+    }
+
+    #xlsxEditorRoot .tool-group{
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding-right: 8px;
+      margin-right: 3px;
+      border-right: 1px solid #e0e0e0;
+    }
+
+    #xlsxEditorRoot .tool-group:last-child{
+      border-right: none;
+    }
+
+    #xlsxEditorRoot .tool-btn{
+      min-width: 34px;
+      height: 34px;
+      border: 1px solid #d0d7de;
+      background: #f6f8fa;
+      color: #24292f;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 9px;
+      transition: all 0.15s ease;
+    }
+
+    #xlsxEditorRoot .tool-btn:hover{
+      background: #eaeef2;
+      border-color: #afb8c1;
+    }
+
+    #xlsxEditorRoot .tool-btn.active{
+      background: #d9eadf;
+      border-color: #217346;
+      color: #185c37;
+    }
+
+    #xlsxEditorRoot .tool-select, #xlsxEditorRoot .tool-input{
+      height: 34px;
+      border: 1px solid #d0d7de;
+      border-radius: 6px;
+      background: #fff;
+      padding: 0 8px;
+      color: #24292f;
+      outline: none;
+    }
+
+    #xlsxEditorRoot .tool-select:focus, #xlsxEditorRoot .tool-input:focus{
+      border-color: #217346;
+      box-shadow: 0 0 0 2px rgba(33, 115, 70, 0.15);
+    }
+
+    #xlsxEditorRoot .color-label{
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      height: 34px;
+      padding: 0 8px;
+      border: 1px solid #d0d7de;
+      border-radius: 6px;
+      background: #f6f8fa;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    #xlsxEditorRoot .color-label input[type="color"]{
+      width: 24px;
+      height: 24px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    /* =========================
+       公式栏
+       ========================= */
+
+    #xlsxEditorRoot .formula-toolbar{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 30px;
+      background: #fafafa;
+      border-bottom: 1px solid #ddd;
+    }
+
+    #xlsxEditorRoot #xlsx_nameBox{
+      width: 85px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    #xlsxEditorRoot .fx{
+      font-style: italic;
+      font-weight: bold;
+      color: #217346;
+      font-size: 18px;
+      width: 28px;
+      text-align: center;
+    }
+
+    #xlsxEditorRoot #xlsx_formulaInput{
+      flex: 1;
+      min-width: 150px;
+    }
+
+    /* =========================
+       Excel 编辑区
+       ========================= */
+
+    #xlsxEditorRoot .editor-container{
+      background: #f3f4f6;
+      padding: 20px 30px 0;
+    }
+
+    #xlsxEditorRoot .sheet-wrapper{
+      height: 610px;
+      background: white;
+      border: 1px solid #d0d7de;
+      overflow: auto;
+      position: relative;
+    }
+
+    #xlsxEditorRoot #xlsx_sheetTable{
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: fixed;
+      min-width: 100%;
+      width: max-content;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+
+    #xlsxEditorRoot #xlsx_sheetTable th, #xlsxEditorRoot #xlsx_sheetTable td{
+      border-right: 1px solid #d9d9d9;
+      border-bottom: 1px solid #d9d9d9;
+    }
+
+    /* 左上角 */
+    #xlsxEditorRoot .corner{
+      width: 48px;
+      min-width: 48px;
+      height: 28px;
+      position: sticky;
+      top: 0;
+      left: 0;
+      z-index: 25;
+      background: #f3f3f3;
+      border-right: 1px solid #aaa !important;
+      border-bottom: 1px solid #aaa !important;
+    }
+
+    /* 列号 */
+    #xlsxEditorRoot .column-header{
+      height: 28px;
+      min-width: 100px;
+      width: 100px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      text-align: center;
+      background: #f3f3f3;
+      color: #444;
+      font-weight: 500;
+      user-select: none;
+      border-bottom: 1px solid #aaa !important;
+    }
+
+    /* 行号 */
+    #xlsxEditorRoot .row-header{
+      width: 48px;
+      min-width: 48px;
+      height: 26px;
+      position: sticky;
+      left: 0;
+      z-index: 15;
+      background: #f3f3f3;
+      color: #444;
+      text-align: center;
+      font-weight: 500;
+      user-select: none;
+      border-right: 1px solid #aaa !important;
+    }
+
+    #xlsxEditorRoot .sheet-cell{
+      min-width: 100px;
+      width: 100px;
+      height: 26px;
+      padding: 3px 5px;
+      white-space: pre;
+      overflow: hidden;
+      text-overflow: clip;
+      vertical-align: middle;
+      outline: none;
+      cursor: cell;
+      background: #fff;
+      position: relative;
+    }
+
+    #xlsxEditorRoot .sheet-cell:focus{
+      outline: none;
+    }
+
+    #xlsxEditorRoot .sheet-cell.selected{
+      background-image:
+        linear-gradient(rgba(33, 115, 70, 0.08), rgba(33, 115, 70, 0.08));
+    }
+
+    #xlsxEditorRoot .sheet-cell.active-cell{
+      box-shadow: inset 0 0 0 2px #217346;
+      z-index: 3;
+    }
+
+    #xlsxEditorRoot .sheet-cell.selected-range{
+      background-image:
+        linear-gradient(rgba(33, 115, 70, 0.12), rgba(33, 115, 70, 0.12));
+    }
+
+    #xlsxEditorRoot .formula-cell::after{
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 5px;
+      height: 5px;
+      background: #217346;
+      opacity: 0.55;
+    }
+
+    /* =========================
+       工作表 Tabs
+       ========================= */
+
+    #xlsxEditorRoot .sheet-tabs-bar{
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #f8f9fa;
+      padding: 8px 30px;
+      border-top: 1px solid #ddd;
+      border-bottom: 1px solid #ddd;
+      overflow-x: auto;
+    }
+
+    #xlsxEditorRoot .sheet-tab{
+      border: 1px solid #d0d7de;
+      background: #fff;
+      color: #333;
+      padding: 7px 14px;
+      border-radius: 5px 5px 0 0;
+      cursor: pointer;
+      white-space: nowrap;
+      font-size: 13px;
+    }
+
+    #xlsxEditorRoot .sheet-tab:hover{
+      background: #eef5f0;
+    }
+
+    #xlsxEditorRoot .sheet-tab.active{
+      color: #185c37;
+      border-bottom: 3px solid #217346;
+      font-weight: 700;
+      background: #fff;
+    }
+
+    #xlsxEditorRoot .add-sheet-btn{
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 1px solid #c8c8c8;
+      background: #fff;
+      cursor: pointer;
+      font-size: 20px;
+      line-height: 20px;
+      color: #217346;
+    }
+
+    #xlsxEditorRoot .status-bar{
+      padding: 10px 30px;
+      background: #f8f9fa;
+      display: flex;
+      justify-content: space-between;
+      color: #6c757d;
+      font-size: 0.9rem;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 900px){
+      #xlsxEditorRoot{
+        padding: 5px;
+      }
+
+      #xlsxEditorRoot .rich-toolbar, #xlsxEditorRoot .formula-toolbar, #xlsxEditorRoot .editor-container, #xlsxEditorRoot .sheet-tabs-bar{
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+
+      #xlsxEditorRoot .tool-group{
+        border-right: none;
+      }
+
+      #xlsxEditorRoot .sheet-wrapper{
+        height: 520px;
+      }
+    }
+  

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GoNavi · PostgreSQL</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <!-- ═══════════════ 内嵌 PostgreSQL 工作台（打开即自动连接，无数据源选择） ═══════════════ -->
+  <div id="app" class="app">
+    <!-- 标题栏 -->
+    <div class="titlebar">
+      <div class="tb-left">
+        <span class="logo-mark sm">G</span>
+        <span class="tb-title">GoNavi · PostgreSQL（内嵌）</span>
+      </div>
+      <div class="tb-right">
+        <div class="conn-pill" id="connPill"><span class="dot"></span><span id="connPillText">连接中…</span></div>
+      </div>
+    </div>
+
+    <!-- 主体 -->
+    <div class="main">
+      <!-- 左侧栏：已连接的 Postgres / 已存查询 / 数据库相关表 -->
+      <aside class="sider">
+        <div class="sider-tools">
+          <button class="iconbtn" id="btnNewQuery" title="新建查询"><span class="tico" id="newQueryIco"></span></button>
+          <button class="iconbtn" id="btnNewConn" title="新建连接">＋</button>
+          <div class="tb-flex"></div>
+          <button class="iconbtn" id="btnRefresh" title="刷新对象">⟳</button>
+        </div>
+        <div class="sider-search">
+          <input id="treeSearch" placeholder="搜索表 / 视图 / 函数…" />
+        </div>
+        <div class="tree-scroll"><div id="tree" class="tree"></div></div>
+        <div class="sider-foot">
+          <button class="logbtn" id="btnLog">SQL 执行日志</button>
+        </div>
+      </aside>
+
+      <!-- 右侧内容 -->
+      <section class="content">
+        <div class="tabbar" id="tabbar"></div>
+        <div class="workspace" id="workspace"></div>
+      </section>
+    </div>
+
+    <!-- 日志抽屉 -->
+    <div id="logDrawer" class="log-drawer hidden">
+      <div class="log-head"><span>SQL 执行日志</span><span class="iconbtn" id="logClose">✕</span></div>
+      <div id="logBody" class="log-body"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+  <script src="./datagrid.js" defer></script>
+  <script src="./app.js" defer></script>
+</body>
+</html>

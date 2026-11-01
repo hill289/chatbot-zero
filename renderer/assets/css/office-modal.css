@@ -1,0 +1,155 @@
+        #officeModal.modal-overlay {
+            align-items: flex-start;
+            padding: 10px;
+            overflow: auto;
+        }
+
+        #officeModal .modal-card {
+            width: 1500px;
+            max-width: calc(100vw - 20px);
+            height: calc(100vh - 20px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        #officeModal .modal-header {
+            flex-shrink: 0;
+        }
+
+        #officeModal .modal-title {
+            gap: 8px;
+        }
+
+        #officeModal .office-file-name {
+            font-size: 14px;
+            color: #333;
+            font-weight: 600;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            max-width: 46vw;
+        }
+
+        #officeModal .office-path {
+            font-size: 12px;
+            color: #888;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            max-width: 460px;
+        }
+
+        #officeModal .modal-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            max-height: none;
+            overflow: hidden;
+            position: relative;
+            background: #eef0f2;
+        }
+
+        #officeModal .office-loading {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 14px;
+            gap: 8px;
+            background: rgba(240, 242, 245, 0.92);
+            z-index: 50;
+        }
+
+        #officeModal .office-loading.hidden {
+            display: none;
+        }
+
+        .office-tabs {
+            display: flex;
+            gap: 6px;
+            padding: 6px 14px;
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+
+        .office-tab {
+            border: 1px solid #d0d7de;
+            background: #fff;
+            color: #374151;
+            padding: 5px 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            line-height: 1.4;
+            white-space: nowrap;
+        }
+
+        .office-tab:hover {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+        }
+
+        .office-tab.active {
+            background: #eef2ff;
+            border-color: #6366f1;
+            color: #4338ca;
+            font-weight: 600;
+        }
+
+        #officeModal .office-scroll {
+            flex: 1;
+            overflow: auto;
+            min-height: 0;
+            position: relative;
+            background: #eef0f2;
+        }
+
+        /* 三个内嵌编辑器根容器：默认隐藏，仅显示激活的一个 */
+        .office-editor-root {
+            display: none;
+        }
+
+        .office-editor-root.active {
+            display: block;
+        }
+
+        /* 覆盖编辑器原有 body 级样式（min-height:100vh 等在弹窗内过大） */
+        #docxEditorRoot, #xlsxEditorRoot, #pptxEditorRoot {
+            min-height: 0 !important;
+            padding: 14px !important;
+            background: #eef0f2 !important;
+        }
+
+        /* 隐藏各编辑器自身的外层标题/说明/文件工具栏，由宿主弹窗统一提供 */
+        #docxEditorRoot header, #docxEditorRoot .instructions, #docxEditorRoot .file-toolbar,
+        #xlsxEditorRoot header, #xlsxEditorRoot .instructions, #xlsxEditorRoot .file-toolbar,
+        #pptxEditorRoot header, #pptxEditorRoot .instructions, #pptxEditorRoot .file-toolbar {
+            display: none !important;
+        }
+
+        /* 富文本/格式工具栏固定在弹窗滚动区顶部（粘性） */
+        #docxEditorRoot .rich-toolbar,
+        #xlsxEditorRoot .rich-toolbar,
+        #pptxEditorRoot .rich-toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 30;
+        }
+
+        #officeModal .modal-footer {
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        #officeModal .m-btn:disabled,
+        #officeModal .mh-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
