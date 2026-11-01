@@ -1,0 +1,77 @@
+{
+  "name": "chatbot-zero",
+  "version": "1.0.0",
+  "description": "chatbot-zero：零后端、可自托管的 AI 智能体工作台（Electron 多标签外壳 + 浏览器内 Node.js 沙箱 + 虚拟文件系统）",
+  "author": "chatbot-zero contributors",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/chatbot-zero/chatbot-zero#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chatbot-zero/chatbot-zero.git"
+  },
+  "bugs": {
+    "url": "https://github.com/chatbot-zero/chatbot-zero/issues"
+  },
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:renderer": "node scripts/build-renderer.js",
+    "upgrade": "node scripts/build-renderer.js --clean",
+    "switch:unpacked": "node scripts/switch-to-unpacked.js",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "dist:win": "electron-builder --win",
+    "dist:mac": "electron-builder --mac",
+    "dist:linux": "electron-builder --linux",
+    "test": "node --test packaging.test.js renderer/sanitize.test.js fs-grant.test.js renderer/drop-grant.test.js renderer/tasks.test.js renderer/job-store.test.js renderer/console-encoding.test.js renderer/eol-meta.test.js renderer/sync-guard.test.js renderer/hunk-select.test.js renderer/delivery-summary.test.js renderer/type-gate.test.js renderer/delivery-flow.test.js renderer/sync-undo.test.js renderer/session-log.test.js renderer/session-replay.test.js renderer/plan-mode.test.js renderer/double-enter.test.js renderer/session-clear.test.js renderer/trim-below.test.js renderer/read-window.test.js renderer/read-fs-tools.test.js renderer/xlsx-fs-bridge.test.js renderer/approval.test.js renderer/hard-cut.test.js renderer/site/demo-core.test.js renderer/run-collect.test.js sandbox/config.test.js sandbox/launch-plan.test.js atomic-write.test.js renderer/file-to-image-core.test.js renderer/db-mcp-core.test.js browser-cdp.test.js renderer/url-resolve.test.js renderer/config-file.test.js pglite-server.test.js renderer/assets/js/task-center-focus.test.js renderer/assets/js/input-focus-guard.test.js renderer/watchdog/watchdog-core.test.js renderer/assets/js/26-router-session.test.js renderer/assets/js/27-worker-pool.test.js renderer/trigger/trigger-filter.test.js renderer/trigger/trigger-router.test.js renderer/channel-format.test.js renderer/assets/js/30-async-tools.test.js renderer/assets/js/32-prompt-queue.test.js renderer/assets/js/28-trigger-bus.test.js renderer/assets/js/31-watchdog.test.js renderer/runner/runner-core.test.js renderer/daemon/agentd.test.js"
+  },
+  "build": {
+    "appId": "com.chatbot-zero.app",
+    "productName": "chatbot-zero",
+    "directories": {
+      "output": "dist"
+    },
+    "asar": false,
+    "files": [
+      "main.js",
+      "preload.js",
+      "fs-grant.js",
+      "browser-cdp.js",
+      "ssh-manager.js",
+      "pglite-server.js",
+      "pglite-service.js",
+      "embedded-db.js",
+      "sandbox/**/*",
+      "renderer/cdp-core.js",
+      "renderer/console-encoding.js",
+      "renderer/job-store.js",
+      "renderer/drop-grant.js",
+      "renderer/run-collect.js",
+      "renderer/url-resolve.js"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ]
+    }
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.5.11",
+    "ssh2": "^1.16.0"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  }
+}
