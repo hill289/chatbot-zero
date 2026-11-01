@@ -1,0 +1,1548 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chatbot-zero</title>
+
+    <!-- jQuery removed: 页面不再依赖 jQuery，全部使用原生 DOM API 实现 -->
+
+
+    <!-- Marked.js for Markdown -->
+    <script src="./marked.min.js">
+    </script>
+
+    <!-- Highlight.js for code syntax -->
+    <link rel="stylesheet" href="./github-dark.min.css">
+    <script src="./highlight.min.js">
+    </script>
+
+    <!-- ═══════════════ CodeMirror 5 for PGPy Editor ═══════════════ -->
+    <link rel="stylesheet" href="./codemirror.min.css">
+    <link rel="stylesheet" href="./show-hint.min.css">
+    <link rel="stylesheet" href="./material-darker.min.css">
+    <script src="./codemirror.min.js"></script>
+    <!-- CodeMirror：本地 javascript 模式（关键字/字符串/注释/数字高亮） -->
+    <script src="./javascript.min.js"></script>
+    <script src="./show-hint.min.js"></script>
+    <script src="./matchbrackets.min.js"></script>
+    <script src="./closebrackets.min.js"></script>
+    <!-- JSZip for ZIP import/export -->
+    <script src="./jszip.min.js"></script>
+    <!-- Office 编辑器合并所需库：docx-preview / html-docx / FileSaver -->
+    <script src="./docx-preview.js"></script>
+    <script src="./html-docx.js"></script>
+    <script src="./FileSaver.min.js"></script>
+    <!-- PPTX 导入解析核心：把 .pptx 解析成尽可能还原「原始版式 + 文字格式」的 HTML -->
+    <script src="./pptx-import-core.js"></script>
+    <!-- xlsx / pptxgenjs 不再单独加载 bundle：almostnode 运行时（almostnode.global.js）
+         已内置这两个 npm 包（/node_modules/xlsx、/node_modules/pptxgenjs）。
+         下面的引导脚本在 almostnode 运行时就绪后，用 require('xlsx') / require('pptxgenjs')
+         取出库对象并注入到 window.XLSX / window.PptxGenJS，供内嵌 Office 编辑器使用；
+         window.__officeLibsReady 在两个库都就绪后 resolve，编辑器初始化时等待它。 -->
+    <script src="./assets/js/office-libs-boot.js"></script>
+    <!-- mammoth: docx → raw text (reference files) -->
+    <script src="./mammoth.browser.min.js"></script>
+    <script src="./ripgrep_wasm_b64.js"></script>
+    <script src="./ripgrep_wasm_nomodule.js"></script>
+    <!-- almostnode runtime: 在浏览器里运行 Node.js（打包为 IIFE 全局脚本，暴露 window.almostnode）
+         提供 createContainer()：内存文件系统 VirtualFS + require('fs'/'path'/'os'/'crypto'/'http'…)
+         + 同步 execute()（console 经 onConsole 回调转发）。
+         本页所有代码执行（编辑器 Run、MCP run_node 工具，以及 read_file / write_file / search_content 等）
+         与 /home/pyodide 工作区文件读写全部由该 Node 运行时提供。 -->
+    <script src="./almostnode.global.js"></script>
+    <!-- @iyulab/anydoc: Office doc → Markdown (WASM, base64 embedded) -->
+    <script  src="./anydoc_wasm_b64.js"></script>
+    <script  src="./anydoc_wasm_bg_nomodule.js"></script>
+    <script  src="./anydoc-init.js"></script>
+
+    <!-- ═══════════════ Markdown → PDF (markview-web, 全部本地化，无 CDN) ═══════════════
+         markview-web 纯网页排版引擎（justified A4 分页）所需依赖：
+           markdown-it (+ texmath) 解析 Markdown，KaTeX 渲染公式，Mermaid 渲染图，
+           html2canvas + jsPDF 生成真正的 PDF 文件。所有 js/css/字体均已下载到本目录。 -->
+    <link rel="stylesheet" href="./katex.min.css">
+    <link rel="stylesheet" href="./markview-web.css">
+    <script src="./katex.min.js"></script>
+    <script src="./markdown-it.min.js"></script>
+    <script src="./texmath.js"></script>
+    <script src="./mermaid.min.js"></script>
+    <script src="./html2canvas.min.js"></script>
+    <script src="./jspdf.umd.min.js"></script>
+    <!-- SnapDOM：HTML/DOM → 图片（file_to_image 用它做 html→image，替代 html2canvas）-->
+    <script src="./snapdom.min.js"></script>
+    <script src="./markview-web.js"></script>
+
+    <link rel="stylesheet" href="./assets/css/app-base.css">
+
+    <!-- ══════════════════════════════════════════════════════════
+         PGPy Editor (almostnode Node.js runtime) styles — ported from index.html v1.0.5
+         ══════════════════════════════════════════════════════════ -->
+    <link rel="stylesheet" href="./assets/css/theme.css">
+    <!-- ═══════ DOCX 编辑器样式（由 docx.html 合并，作用域限定） ═══════ -->
+    <link rel="stylesheet" href="./assets/css/office-docx.css">
+    <!-- ═══════ XLSX 编辑器样式（由 xlsx.html 合并，作用域限定） ═══════ -->
+    <link rel="stylesheet" href="./assets/css/office-xlsx.css">
+    <!-- ═══════ PPTX 编辑器样式（由 pptx.html 合并，作用域限定） ═══════ -->
+    <link rel="stylesheet" href="./assets/css/office-pptx.css">
+    <!-- ═══════════════ Office 编辑器对话框 (docx/xlsx/pptx 双击浏览与保存) ═══════════════ -->
+    <link rel="stylesheet" href="./assets/css/office-modal.css">
+    <!-- ═══════════════ LSP 诊断（tsserver）样式 ═══════════════ -->
+    <link rel="stylesheet" href="./assets/css/pgpy.css">
+    <!-- Plan 模式（Ask/Plan/Craft）步骤卡面板 + 编辑弹窗 -->
+    <link rel="stylesheet" href="./assets/css/plan-mode.css">
+</head>
+
+<body>
+    <div id="app">
+        <!-- ══════════════════════════════════════════════════════════ -->
+        <!-- PGPy Editor (Node.js / almostnode) — always visible at top        -->
+        <!-- ══════════════════════════════════════════════════════════ -->
+        <div id="pgpyContainer">
+          <!-- Header -->
+          <div class="pgpy-header">
+            <div class="pgpy-header-left">
+              <h2>🟩 Node.js</h2>
+              <span class="pgpy-subtitle" id="pgpyHeaderSubtitle">Node.js Editor — almostnode runtime in your browser</span>
+            </div>
+            <div class="pgpy-header-right">
+              <button class="pgpy-btn pgpy-btn-primary" id="openPostgresBtn" onclick="openPostgresDatabase()" title="打开内嵌 PostgreSQL 数据库（自动连接，无需单独启动）">🐘 <span class="pgpy-label-text">PostgreSQL</span></button>
+              <div id="pgpyLspStatus" class="pgpy-lsp-status pgpy-lsp-idle" title="TypeScript 诊断（LSP · tsserver）">LSP · …</div>
+              <div id="pgpyStatus" class="pgpy-status-badge pgpy-loading">⏳ Initializing...</div>
+            </div>
+          </div>
+
+          <!-- Main Layout -->
+          <div class="pgpy-main-layout">
+            <!-- Editor Panel -->
+            <div class="pgpy-editor-panel" id="pgpyEditorPanel">
+              <!-- Toolbar -->
+              <div class="pgpy-toolbar">
+                <div class="pgpy-group">
+                  <button class="pgpy-btn pgpy-btn-run" id="runBtn" disabled onclick="runCurrent()" title="Run (Ctrl+Enter)">▶ <span class="pgpy-label-text">Run</span></button>
+                  <button class="pgpy-btn" id="runWsBtn" onclick="pgpyRunWorkspacePrompt()" title="物化到应用目录 workspace/ 后真实执行命令 / 测试运行器（需 Electron 外壳）" style="margin-left:4px;">⚡ <span class="pgpy-label-text">Run WS</span></button>
+                  <button class="pgpy-btn" id="aiModeBtn" onclick="toggleAiMode()" title="Toggle AI Mode" style="margin-left:4px;">🤖 <span class="pgpy-label-text">AI Off</span></button>
+                </div>
+                <div class="pgpy-separator"></div>
+                <div class="pgpy-group">
+                  <button class="pgpy-btn pgpy-btn-icon" onclick="pgpyEditor && pgpyEditor.undo()" title="Undo (Ctrl+Z)">↩</button>
+                  <button class="pgpy-btn pgpy-btn-icon" onclick="pgpyEditor && pgpyEditor.redo()" title="Redo (Ctrl+Y)">↪</button>
+                  <button class="pgpy-btn pgpy-btn-icon" onclick="clearEditor()" title="清除编辑器与工作区;表格勾选文件时则删除所选">🗑</button>
+                </div>
+                <div class="pgpy-separator"></div>
+                <div class="pgpy-group">
+                  <button class="pgpy-btn" onclick="showHistory()" title="Node.js History">🕐 <span class="pgpy-label-text">History</span>
+                    <span id="historyBadge" class="pgpy-badge" style="display:none;background:#e0e7ff;color:#3730a3;padding:0 5px;border-radius:8px;font-size:10px;">0</span>
+                  </button>
+                </div>
+                <div class="pgpy-separator"></div>
+                <div class="pgpy-group">
+                  <button class="pgpy-btn pgpy-btn-primary" id="importFileBtn" onclick="importFile()" title="Import file or ZIP archive">📂 <span class="pgpy-label-text">Import File</span></button>
+                  <button class="pgpy-btn pgpy-btn-primary" id="importFolderBtn" onclick="importFolder()" title="Import folder (preserves directory structure)">📁 <span class="pgpy-label-text">Import Folder</span></button>
+
+                  <button class="pgpy-btn pgpy-btn-export" id="exportZipBtn" onclick="exportToZIP()" style="background:#7c3aed;border-color:#7c3aed;">📦 <span class="pgpy-label-text">Export File</span></button>
+                  <button class="pgpy-btn pgpy-btn-export" id="exportFolderBtn" onclick="exportToFolder()" style="background:#0d9488;border-color:#0d9488;" title="选择目录后把勾选文件(保留相对目录结构,自动创建子目录)写入该目录;未勾选则导出全部">🗂 <span class="pgpy-label-text">Export Folder</span></button>
+                  <button class="pgpy-btn" id="sftpUploadBtn" onclick="pgpySftpUpload()" title="把勾选（或当前打开）的文件经 SFTP 上传到已连接的 SSH 主机">⬆ <span class="pgpy-label-text">SFTP 上传</span></button>
+                  <button class="pgpy-btn" id="sftpDownloadBtn" onclick="pgpySftpDownload()" title="从已连接的 SSH 主机经 SFTP 下载文件到工作区（文件列表自动刷新）">⬇ <span class="pgpy-label-text">SFTP 下载</span></button>
+
+                </div>
+                <div class="pgpy-separator" id="filesSep"></div>
+                <div class="pgpy-group" id="filesGroup">
+                  <button class="pgpy-btn" onclick="listNodeFiles()" title="List files in almostnode filesystem">📂 <span class="pgpy-label-text">Files</span></button>
+                  <button class="pgpy-btn" onclick="importHistoryJson()" title="Import Query History JSON conversation">📥 <span class="pgpy-label-text">Import Json</span></button>
+                  <button class="pgpy-btn pgpy-btn-export" id="saveFileBtn" onclick="saveCurrentFile()" title="Save edited file content to almostnode FS (write_file)" disabled>💾 <span class="pgpy-label-text">Save File</span></button>
+                  <button class="pgpy-btn" id="syncRealBtn" onclick="pgpySyncToRealNow()" title="把 AI 改动的文件写回磁盘真实路径" disabled>🔁 <span class="pgpy-label-text">同步</span>
+                    <span id="syncRealBadge" class="pgpy-badge" style="display:none;background:#fee2e2;color:#b91c1c;padding:0 5px;border-radius:8px;font-size:10px;">0</span>
+                  </button>
+                  <button class="pgpy-btn" id="pgpyUndoSyncBtn" onclick="pgpyUndoLastSync()" title="没有可撤销的写回批次" disabled>⟲ <span class="pgpy-label-text">撤销写回</span></button>
+                  <button class="pgpy-btn" id="pgpyRedoSyncBtn" onclick="pgpyRedoSync()" title="没有可重做的写回批次" disabled>⟳ <span class="pgpy-label-text">重做写回</span></button>
+                  <span id="pgpyCurrentFileLabel" class="pgpy-file-chip" style="display:none;" title="当前在编辑器中打开的文件（双击表格行可重新载入）"></span>
+                </div>
+                <input type="file" id="fileInput" accept="*/*" multiple style="display:none;">
+                <input type="file" id="folderInput" webkitdirectory multiple style="display:none;">
+                <input type="file" id="historyJsonInput" accept="application/json,.json" style="display:none;">
+                <input type="file" id="historyJsonInput" accept="application/json,.json" style="display:none;">
+                <div class="pgpy-spacer"></div>
+                <div class="pgpy-group" id="exampleGroup">
+                  <button class="pgpy-btn" onclick="loadExample(3)">Array Ops</button>
+                  <button class="pgpy-btn" onclick="loadExample(4)">File & Process</button>
+                  <button class="pgpy-btn" onclick="loadExample(3)">List Comp</button>
+                  <button class="pgpy-btn" onclick="loadExample(4)">Micropip</button>
+                </div>
+              </div>
+              <!-- CodeMirror Editor -->
+              <div class="pgpy-editor-container" id="pgpyEditorContainer"></div>
+            </div>
+            <!-- Resize Handle -->
+            <div class="pgpy-resize-handle" id="pgpyResizeHandle"></div>
+            <!-- Results Panel -->
+            <div class="pgpy-results-panel" id="pgpyResultsPanel">
+              <div class="pgpy-results-toolbar" id="pgpyResultsToolbar" style="display:none;">
+                <div class="pgpy-label">📊 Query Results
+                  <span class="pgpy-badge" id="pgpyRowCount">0</span>
+                  <span class="pgpy-timing" id="pgpyTiming"></span>
+                </div>
+                <div class="pgpy-spacer"></div>
+              </div>
+              <!-- Empty state -->
+              <div class="pgpy-results-empty" id="pgpyResultsEmpty">
+                <div class="pgpy-icon">📋</div>
+                <span>Run a query to see results</span>
+                <span style="font-size:11px; color:#bbb;">Ctrl + Enter to execute</span>
+                <span style="font-size:11px; color:#bbb; margin-top:2px;">📂 或直接拖放文件 / 文件夹到页面任意位置，自动加入工作区</span>
+              </div>
+              <!-- Table -->
+              <div class="pgpy-table-wrapper" id="pgpyTableWrapper" style="display:none;">
+                <table class="pgpy-results-table" id="pgpyResultsTable">
+                  <thead id="pgpyResultsHead"></thead>
+                  <tbody id="pgpyResultsBody"></tbody>
+                </table>
+              </div>
+              <!-- Message area -->
+              <div class="pgpy-results-message" id="pgpyResultsMessage" style="display:none;"></div>
+            </div>
+          </div>
+          <!-- History Modal -->
+          <div class="pgpy-modal-overlay pgpy-hidden" id="pgpyHistoryModal">
+            <div class="pgpy-modal">
+              <div class="pgpy-modal-header">
+                <h3>🟩 Node.js History</h3>
+                <button class="pgpy-modal-close" onclick="hideHistory()">✕</button>
+              </div>
+              <div class="pgpy-modal-body" id="pgpyHistoryBody">
+                <div style="text-align:center; padding:40px; color:#999;">No history yet</div>
+              </div>
+              <div class="pgpy-modal-footer">
+                <span class="pgpy-count" id="pgpyHistoryCount">0 queries</span>
+                <button class="pgpy-btn" onclick="clearHistory()" style="color:var(--error);border-color:#fecaca;">Clear All</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 空状态 -->
+        <div id="emptyState" class="empty-state">
+            <a href="#" class="empty-title"><span class="empty-emoji">🚀</span><span id="emptyStateTitle">AI Query
+                    Layout</span></a>
+        </div>
+
+        <!-- 对话区 -->
+        <div id="chatBot" class="chat-bot">
+            <div id="chatContainer" class="chat-container conversation-area"></div>
+            <div class="fill-area"></div>
+        </div>
+
+        <!-- 输入区 -->
+        <div class="input-area">
+            <div class="input-panel">
+                <div class="plan-bar" id="planBar"></div>
+                <div class="run-timer-wrap" id="runTimer">
+                    <span class="run-timer" id="runTimerText"></span>
+                </div>
+                <div class="conv-cost-wrap" id="convCost"></div>
+
+                <div class="cache-stats-wrap" id="cacheStats"></div>
+
+                <div class="speed-dial-wrap">
+                    <!-- 左侧圆形按钮簇：2×2 网格 —— ⇄ 对比 / 📦 导出全部工作区 在上，⚙️ 菜单 / 🖼️ 附件 在下，上下两行严格对齐 -->
+                    <div class="sd-cluster">
+                        <button class="sd-btn sd-quick-btn" id="sdDiffBtn" title="对比（暂无改动的文件）" disabled>⇄<span class="sd-badge" id="sdDiffBadge" style="display:none">0</span></button>
+                        <button class="sd-btn sd-quick-btn" id="sdExportAllBtn" title="导出全部工作区文件 / Export all workspace files (ZIP)">📦</button>
+                        <button class="sd-activator" id="sdActivator" title="Menu">⚙️</button>
+                        <div class="attach-wrap" id="attachWrap">
+                            <button class="attach-btn" id="attachImageBtn" title="Attach image — 也可直接粘贴(Ctrl+V)或拖拽图片到输入框">🖼️</button>
+                            <input type="file" id="chatImageInput" accept="image/*" multiple style="display:none;">
+                        </div>
+                    </div>
+                    <div class="speed-dial" id="speedDial"></div>
+                    <div class="lang-menu" id="langMenu"></div>
+                </div>
+
+                <div class="input-box" id="inputBox">
+                    <div class="attach-bar" id="attachBar" style="display:none;"></div>
+                    <textarea id="userInput" rows="3" placeholder="Type your message... (连续两次 Enter 发送，或 Ctrl/⌘+Enter 直接发送 / Shift+Enter 换行; 可粘贴/拖入图片)"></textarea>
+                </div>
+
+                <div class="input-side">
+                    <!-- 新建对话：位于输入框右侧、More(⋯)/发送 按钮正上方 -->
+                    <button class="new-chat-act" id="inputNewChatBtn" title="新建对话 / New Conversation">✏️</button>
+                    <div class="input-icon" id="inputIcon"></div>
+                </div>
+                <div class="more-menu" id="moreMenu"></div>
+            </div>
+        </div>
+
+        <div class="snackbar" id="snackbar"></div>
+
+        <!-- 图片放大预览 -->
+        <div class="img-lightbox" id="imgLightbox"><button class="lb-close" title="Close">✕</button><img alt="preview"></div>
+
+        <!-- ═══════════ 历史记录对话框 ═══════════ -->
+        <div class="modal-overlay" id="historyModal">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <span class="modal-title">📜 <span data-i18n="q.title">Query History</span></span>
+                    <button class="mh-btn" id="historyDownloadAll" title="Download">⬇️</button>
+                    <button class="mh-btn danger" id="historyClearAll" title="Clear all">🗑️</button>
+                    <button class="mh-btn modal-close">✕</button>
+                </div>
+                <div class="modal-body" id="historyList"></div>
+            </div>
+        </div>
+        <!-- ═══════════ ask_user 人机确认对话框 ═══════════ -->
+        <div class="modal-overlay" id="askUserModal">
+            <div class="modal-card small">
+                <div class="modal-header">
+                    <span class="modal-title">❓ <span id="askUserTitle">Waiting for your confirmation</span></span>
+                    <button class="mh-btn" id="askUserClose" title="Cancel">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div id="askUserQuestion" class="ask-question"></div>
+                    <div id="askUserContext" class="ask-context" style="display:none;"></div>
+                    <div id="askUserOptions" class="ask-options"></div>
+                    <div id="askUserTextWrap" class="ask-textwrap">
+                        <textarea id="askUserText" rows="3" placeholder="Type your answer… (Enter 提交 / Shift+Enter 换行 / Esc 取消)"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <span class="ask-hint" id="askUserHint"></span>
+                    <span class="spacer"></span>
+                    <button class="m-btn outline" id="askUserCancel">Cancel</button>
+                    <button class="m-btn primary" id="askUserSubmit">Submit</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════ 工具审批对话框（写 / 改 / 删 / 执行） ═══════════ -->
+        <div class="modal-overlay" id="approvalModal">
+            <div class="modal-card approval-card">
+                <div class="modal-header">
+                    <span class="modal-title">🛡️ <span id="approvalTitle">工具审批</span></span>
+                    <span class="ap-risk medium" id="approvalRisk">需确认</span>
+                    <button class="mh-btn" id="approvalClose" title="拒绝并关闭 (Esc)">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div id="approvalSummary" class="ap-summary"></div>
+                    <div id="approvalRows" class="ap-rows"></div>
+                    <div id="approvalPreviewWrap" class="ap-prev-wrap" style="display:none;">
+                        <div class="ap-prev-title">改动预览 / Preview</div>
+                        <pre id="approvalPreview" class="ap-pre"></pre>
+                    </div>
+                    <label class="ap-reason-label" for="approvalReason">拒绝理由（可选；会原样告知模型，帮它换一种做法）</label>
+                    <textarea id="approvalReason" class="ap-reason" rows="2"
+                              placeholder="例：这个目录是生产配置，不要动；要改请改副本。"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <span class="ap-hint" id="approvalTimerHint"></span>
+                    <span class="ap-hint" id="approvalQueueHint"></span>
+                    <span class="spacer"></span>
+                    <button class="m-btn outline" id="approvalDeny">⛔ 拒绝</button>
+                    <button class="m-btn outline" id="approvalAllowSession">🔁 本会话允许</button>
+                    <button class="m-btn primary" id="approvalAllowOnce">✅ 允许一次</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════ 文件比较对话框（Beyond Compare 风格） ═══════════ -->
+        <div class="modal-overlay" id="diffModal">
+            <div class="modal-card diff-card">
+                <div class="modal-header">
+                    <span class="modal-title">⇄ <span id="diffTitleText">文件比较</span></span>
+                    <button class="mh-btn" id="diffPrev" title="上一个差异 (Alt+↑)">▲</button>
+                    <button class="mh-btn" id="diffNext" title="下一个差异 (Alt+↓)">▼</button>
+                    <span id="diffNavCount" style="font-size:12px;color:#64748b;min-width:52px;text-align:center;">0 / 0</span>
+                    <button class="mh-btn modal-close" title="关闭">✕</button>
+                </div>
+                <div class="diff-toolbar">
+                    <span id="diffFileWrap" style="display:none;">
+                        <select id="diffFileSelect" class="diff-select" title="选择要比较的已修改文件"></select>
+                    </span>
+                    <span class="diff-modes">
+                        <button type="button" class="diff-mode-btn active" data-mode="split">并排</button>
+                        <button type="button" class="diff-mode-btn" data-mode="unified">统一</button>
+                    </span>
+                    <label class="diff-opt"><input type="checkbox" id="diffOnlyChanges"> 仅差异</label>
+                    <label class="diff-opt"><input type="checkbox" id="diffIgnoreWs"> 忽略空白</label>
+                    <span class="diff-stats" id="diffStats"></span>
+                    <span class="diff-hunkbar" id="diffHunkBar" style="display:none;">
+                        <span class="dh-label">变更块</span>
+                        <b id="diffHunkCount" class="dh-ok">0/0</b>
+                        <button type="button" class="ds-mini" id="diffHunkAll" title="勾选全部块（= 整份同步）">全接受</button>
+                        <button type="button" class="ds-mini" id="diffHunkNone" title="全部不勾选（等于不同步）">全拒绝</button>
+                    </span>
+                </div>
+                <div class="diff-sync-panel" id="diffSyncPanel" style="display:none;">
+                    <div class="diff-sync-head">
+                        <span class="diff-sync-title">📋 待同步文件 <b id="diffSyncCount">0</b></span>
+                        <label class="diff-opt"><input type="checkbox" id="diffSyncAll"> 全选</label>
+                        <button type="button" class="ds-mini" id="diffSyncNone">全不选</button>
+                        <span class="diff-sync-spacer"></span>
+                        <button type="button" class="m-btn primary" id="diffSyncBtn" disabled>🔁 一键同步勾选 (0)</button>
+                    </div>
+                    <div class="diff-sync-list" id="diffSyncList"></div>
+                </div>
+                <div class="diff-filebar">
+                    <span class="dl"><span class="diff-dot diff-dot-l"></span><b id="diffLeftLabel">修改前</b></span>
+                    <span class="dl"><span class="diff-dot diff-dot-r"></span><b id="diffRightLabel">修改后</b></span>
+                </div>
+                <div class="diff-deliver" id="diffDeliver" style="display:none;">
+                    <div class="diff-deliver-head">
+                        <span class="dd-title">📋 交付说明（自动生成）</span>
+                        <span class="dd-summary" id="diffDeliverLine"></span>
+                        <span class="dd-spacer"></span>
+                        <button type="button" class="ds-mini" id="diffDeliverCopy" title="复制为 Markdown（可贴进 PR / 工单）">复制</button>
+                        <button type="button" class="ds-mini" id="diffDeliverToggle">收起</button>
+                    </div>
+                    <pre class="diff-deliver-body" id="diffDeliverBody"></pre>
+                </div>
+                <div class="diff-panes" id="diffPanes"></div>
+                <div class="modal-footer">
+                    <span id="diffHint" style="font-size:12px;color:#94a3b8;"></span>
+                    <span class="spacer"></span>
+                    <button class="m-btn primary" id="diffApplyHunks" style="display:none;">✅ 写回所选块</button>
+                    <button class="m-btn outline" id="diffCopyLeft">复制修改前</button>
+                    <button class="m-btn outline" id="diffCopyRight">复制修改后</button>
+                    <button class="m-btn primary" id="diffClose2">关闭</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════ 工具调用轨迹回放对话框（Tool Trace Replay） ═══════════ -->
+        <div class="modal-overlay" id="traceModal">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <span class="modal-title">🧭 <span>工具调用轨迹回放</span></span>
+                    <button class="mh-btn" id="traceRefresh" title="重新采集轨迹">⟳</button>
+                    <button class="mh-btn" id="traceCopy" title="复制轨迹 JSON">📋</button>
+                    <button class="mh-btn" id="traceDownload" title="下载轨迹 JSON">⬇️</button>
+                    <button class="mh-btn modal-close" title="关闭">✕</button>
+                </div>
+                <div class="trace-wrap">
+                    <div class="trace-toolbar">
+                        <button class="trace-btn" id="traceFirst" title="回到第一步">⏮</button>
+                        <button class="trace-btn" id="tracePrev" title="上一步 (←)">◀</button>
+                        <button class="trace-btn primary" id="tracePlay" title="播放 / 暂停 (空格)">▶ 播放</button>
+                        <button class="trace-btn" id="traceNext" title="下一步 (→)">▶</button>
+                        <button class="trace-btn" id="traceLast" title="跳到最后一步">⏭</button>
+                        <div class="trace-progress" id="traceProgress" title="点击跳转"><i></i></div>
+                        <span class="trace-clock" id="traceClock">0 / 0</span>
+                        <span class="trace-speed">速度
+                            <select id="traceSpeed">
+                                <option value="0.5">0.5×</option>
+                                <option value="1" selected>1×</option>
+                                <option value="2">2×</option>
+                                <option value="4">4×</option>
+                                <option value="8">8×</option>
+                            </select>
+                        </span>
+                        <label class="trace-sync"><input type="checkbox" id="traceSync"> 同步对话区</label>
+                    </div>
+                    <div class="trace-head" id="traceHead"></div>
+                    <div class="trace-cols">
+                        <div class="trace-list" id="traceList"></div>
+                        <div class="trace-detail" id="traceDetail"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════ 接口配置对话框 ═══════════ -->
+        <div class="modal-overlay" id="configModal">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <span class="modal-title">⚙️ <span data-i18n="i.title">Interface Configuration</span></span>
+                    <button class="mh-btn danger" id="configReset" title="Reset">🔄</button>
+                    <button class="mh-btn modal-close">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label><span data-i18n="i.apikey">API Key</span></label>
+                        <div class="api-key-wrap">
+                            <input type="password" id="apiKeyInput" placeholder="sk-...">
+                            <button class="eye-btn" id="apiKeyEye" title="Show/Hide">👁️</button>
+                        </div>
+                    </div>
+
+                    <div class="panel open" id="panelEndpoint">
+                        <div class="panel-header">
+                            🌐 <span data-i18n="i.endpoint">Endpoint</span>
+                            <span class="panel-chips">
+                                <span class="chip" id="endpointChip"></span>
+                                <span class="chip" id="modelChip"></span>
+                            </span>
+                            <span class="chev">▾</span>
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <label><span data-i18n="i.url">URL</span></label>
+                                <input type="text" id="apiUrlInput" list="urlList" placeholder="https://api.openai.com">
+                                <datalist id="urlList"></datalist>
+                            </div>
+                            <div class="form-group">
+                                <label><span data-i18n="i.path">Path</span></label>
+                                <input type="text" id="apiPathInput" list="pathList" placeholder="/v1/chat/completions">
+                                <datalist id="pathList"></datalist>
+                            </div>
+                            <div class="form-group">
+                                <label><span data-i18n="i.model">Model</span></label>
+                                <input type="text" id="modelInput" list="modelList" placeholder="gpt-4">
+                                <datalist id="modelList"></datalist>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel" id="panelAdvanced">
+                        <div class="panel-header">
+                            🔑 <span data-i18n="i.advanced">Advanced</span>
+                            <span class="panel-chips" id="advChips"></span>
+                            <span class="chev">▾</span>
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <div class="field-row">
+                                    <div>
+                                        <label><span data-i18n="i.method">HTTP Method</span></label>
+                                        <input type="text" id="methodInput" list="methodList" placeholder="POST">
+                                        <datalist id="methodList">
+                                            <option value="POST">
+                                            <option value="GET">
+                                            <option value="PUT">
+                                        </datalist>
+                                    </div>
+                                    <div>
+                                        <label><span data-i18n="i.contentType">Content Type</span></label>
+                                        <input type="text" id="contentTypeInput" placeholder="application/json">
+                                    </div>
+                                </div>
+                            </div>
+                            <label class="form-check">
+                                <input type="checkbox" id="streamCheckbox"> <span data-i18n="i.stream">Stream</span>
+                            </label>
+                            <label class="form-check">
+                                <input type="checkbox" id="cacheCheckbox"> <span data-i18n="i.cache">Prefix Cache</span>
+                            </label>
+
+                            <label class="form-check">
+                                <input type="checkbox" id="mcpCheckbox"> <span data-i18n="i.mcp">MCP</span>
+                            </label>
+                            <label class="form-check">
+                                <input type="checkbox" id="disableReadUrlCheckbox"> <span>禁用 read_url 工具（Disable read_url tool）</span>
+                            </label>
+                            <label class="form-check">
+                                <input type="checkbox" id="multimodalEnabledCheckbox"> <span>启用多模态图片回传（关闭后仅回文本描述，适配纯文本模型；Enable multimodal image output）</span>
+                            </label>
+                            <div class="form-group">
+                                <label>🛡️ 执行护栏阈值（Loop Guard — 防长任务跑偏）</label>
+                                <div class="field-row">
+                                    <div>
+                                        <label>单轮步数上限</label>
+                                        <input type="number" min="1" step="1" id="loopGuardMaxSteps" placeholder="30">
+                                    </div>
+                                    <div>
+                                        <label>重复提醒阈值</label>
+                                        <input type="number" min="1" step="1" id="loopGuardSoftRepeat" placeholder="3">
+                                    </div>
+                                </div>
+                                <div class="field-row" style="margin-top:4px;">
+                                    <div>
+                                        <label>重复中止阈值</label>
+                                        <input type="number" min="1" step="1" id="loopGuardHardRepeat" placeholder="5">
+                                    </div>
+                                    <div>
+                                        <label>连续失败上限</label>
+                                        <input type="number" min="1" step="1" id="loopGuardMaxErrorRepeat" placeholder="3">
+                                    </div>
+                                </div>
+                                <div style="font-size:11px;color:#94a3b8;margin-top:2px;">
+                                    同一轮内：连续相同工具调用达「提醒」次数→提示模型改变策略，达「中止」次数→自动停止；单轮工具调用超过「步数上限」→停止。
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>🛡️ 工具审批（写 / 改 / 删 / 执行 → 逐次确认）</label>
+                                <label><input type="checkbox" id="approvalEnabledCheckbox"> <span>启用审批（关闭后高风险工具直接执行）</span></label>
+                                <div class="field-row" style="margin-top:4px;">
+                                    <div>
+                                        <label>需要审批的工具（逗号分隔）</label>
+                                        <input type="text" id="approvalToolsInput" placeholder="write_file, edit_file, delete_file, run_shell">
+                                    </div>
+                                    <div>
+                                        <label>审批超时（秒，0 = 不超时）</label>
+                                        <input type="number" min="0" step="10" id="approvalTimeoutInput" placeholder="300">
+                                    </div>
+                                </div>
+                                <div style="font-size:11px;color:#94a3b8;margin-top:2px;">
+                                    允许一次 / 本会话允许（run_shell 按命令首词记忆，如 git）/ 拒绝（理由会作为工具结果回给模型）。<br>
+                                    <span id="approvalGrantsHint"></span>
+                                </div>
+                                <div style="margin-top:6px;">
+                                    <button type="button" class="m-btn outline" id="approvalRevokeBtn" style="padding:5px 12px;font-size:13px;">撤销本会话全部授权</button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>🧠 上下文窗口 / 硬切（Context Window · Hard-Cut）</label>
+                                <div class="field-row">
+                                    <div>
+                                        <label>窗口大小（tokens）</label>
+                                        <input type="number" min="1" step="1024" id="contextWindowTokensInput" placeholder="1048576">
+                                    </div>
+                                    <div>
+                                        <label>硬切触发比例（0.3–0.98）</label>
+                                        <input type="number" min="0.3" max="0.98" step="0.01" id="hardCutRatioInput" placeholder="0.85">
+                                    </div>
+                                </div>
+                                <label class="form-check" style="margin-top:4px;">
+                                    <input type="checkbox" id="hardCutEnabledCheckbox"> <span>启用硬切窗口（接近上限时归档旧对话并开新窗口）</span>
+                                </label>
+                                <div style="font-size:11px;color:#94a3b8;margin-top:2px;">
+                                    默认 1024K = 1048576 tokens；64K 模型填 64000，128K 模型填 131072。此值同时决定「本页累计 · 已用上下文 %」的分母。
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>🗂️ 本地记忆（Local Memory — 默认不启用）</label>
+                                <label class="form-check">
+                                    <input type="checkbox" id="memoryEnabledCheckbox"> <span>启用 memory（自动召回 + 画像注入 + 会话索引 + memory_* / session_search 工具）</span>
+                                </label>
+                                <div class="field-row" style="margin-top:4px;">
+                                    <div>
+                                        <label>自动召回条数上限</label>
+                                        <input type="number" min="1" step="1" id="memoryRecallLimitInput" placeholder="6">
+                                    </div>
+                                </div>
+                                <div style="font-size:11px;color:#94a3b8;margin-top:2px;">
+                                    记忆全部保存在本机 IndexedDB，不上传服务器。默认关闭：不初始化数据库、不注入记忆、不索引会话，memory_* 工具不下发给模型。开启或关闭在保存配置后立即生效。
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>MCP Servers (Streamable HTTP，含 /mcp 路径；可添加多个)</label>
+                                <div id="mcpUrlList"></div>
+                                <button type="button" class="m-btn outline" id="mcpAddUrlBtn" onclick="addMcpUrlRow('')" style="padding:5px 12px;font-size:13px;">＋ Add MCP Server</button>
+                            </div>
+                            <div class="form-group">
+                                <label>SSH Servers（MCP ssh 工具 + SFTP 传输；可配置多个主机）</label>
+                                <div id="sshHostList"></div>
+                                <button type="button" class="m-btn outline" id="sshAddHostBtn" onclick="addSshHostRow()" style="padding:5px 12px;font-size:13px;">＋ Add SSH Host</button>
+                                <button type="button" class="m-btn outline" id="sshDisconnectAllBtn" onclick="sshDisconnectAll()" style="padding:5px 12px;font-size:13px;margin-left:6px;">⏏ Disconnect All</button>
+                                <div style="font-size:11px;color:#94a3b8;margin-top:4px;">
+                                    每行一台主机（IP/主机、端口、用户名、密码）。点「🔌 Connect」建立连接后，
+                                    MCP 会下发 ssh_* 工具（远程执行/列目录/文件传输），VFS 工具栏的 SFTP 上传/下载也可用。密码经 safeStorage 加密存储，不落明文。
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="field-row">
+                                    <div>
+                                        <label><span data-i18n="i.maxTokensPrefix">Max Tokens Prefix</span></label>
+                                        <input type="text" id="maxTokensTypeInput" list="maxTokensTypeList">
+                                        <datalist id="maxTokensTypeList"></datalist>
+                                    </div>
+                                    <div>
+                                        <label>MaxTokenValue</label>
+                                        <input type="number" id="maxTokensValueInput" placeholder="default">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="field-row">
+                                    <div>
+                                        <label><span data-i18n="i.temperature">Temperature</span></label>
+                                        <input type="number" step="0.1" min="0" max="2" id="temperatureInput"
+                                            placeholder="default">
+                                    </div>
+                                    <div>
+                                        <label><span data-i18n="i.topP">Top P</span></label>
+                                        <input type="number" step="0.1" min="0" max="1" id="topPInput"
+                                            placeholder="default">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label><span data-i18n="i.authPrefix">Auth Prefix</span></label>
+                                <input type="text" id="authPrefixInput" list="authPrefixList" placeholder="Bearer">
+                                <datalist id="authPrefixList">
+                                    <option value="Bearer">
+                                    <option value="Base">
+                                    <option value="Token">
+                                </datalist>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="file" id="configFile" accept="application/json" style="display:none;">
+                    <button class="m-btn outline" id="configFileBtn">📄 <span data-i18n="i.configFile">Config File</span></button>
+                    <button class="m-btn outline" id="configReloadBtn" title="修改应用目录 config/interface.json 后点此从文件重新加载">🔁 从文件刷新</button>
+                    <span class="spacer"></span>
+                    <button class="m-btn primary" id="configOkBtn">OK</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════ 智能体对话框 ═══════════ -->
+        <div class="modal-overlay" id="agentModal">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <span class="modal-title">🧠 <span data-i18n="a.title">Agent</span></span>
+                    <button class="mh-btn danger" id="agentReset" title="Clear all">🗑️</button>
+                    <button class="mh-btn modal-close">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="board" id="agentBoard"></div>
+                    <div id="mcpToolsSection">
+                        <h5 style="font-weight:700;margin:14px 0 6px;">MCP</h5>
+                        <table class="mcp-tools-table" id="mcpToolsTable">
+                            <thead>
+                                <tr><th>Name</th><th>Description</th></tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════ 编辑卡片对话框 ═══════════ -->
+        <div class="modal-overlay" id="editCardModal">
+            <div class="modal-card small">
+                <div class="modal-header">
+                    <span class="modal-title">Edit Card</span>
+                    <button class="mh-btn modal-close">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Title</label>
+                        <input type="text" id="editCardTitle" placeholder="Title">
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="editCardDesc" rows="4" placeholder="Description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Reference File</label>
+                        <input type="file" id="editCardRefFile" accept=".docx, .md, .txt" style="width:100%;">
+                        <div id="editCardRefText"
+                            style="font-size:12px;color:#666;background:#f5f5f5;padding:8px;border-radius:4px;margin-top:6px;max-height:120px;overflow-y:auto;white-space:pre-wrap;word-break:break-word;">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <span class="spacer"></span>
+                    <button class="m-btn outline" id="editCardCancel">Cancel</button>
+                    <button class="m-btn primary" id="editCardSave">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════ Prompt 模板对话框 ═══════════ -->
+        <div class="modal-overlay" id="promptModal">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <span class="modal-title">📝 <span data-i18n="p.title">Prompts Template</span></span>
+                    <button class="mh-btn modal-close">✕</button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" class="prompt-search" id="promptSearch" placeholder="Search">
+                    <div class="prompt-grid" id="promptList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════ Prompt Sheet 对话框 ═══════════ -->
+        <div class="modal-overlay" id="promptSheetModal">
+            <div class="modal-card small">
+                <div class="modal-header">
+                    <span class="modal-title">📝 <span data-i18n="p.sheet">Prompts Sheet</span> - <span id="promptSheetTitle"></span></span>
+                    <button class="mh-btn modal-close">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div id="promptSheetDesc" style="font-size:13px;color:#666;margin-bottom:12px;"></div>
+                    <div id="promptSheetArgs"></div>
+                </div>
+                <div class="modal-footer">
+                    <span class="spacer"></span>
+                    <button class="m-btn primary" id="promptSheetGet">Get</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════ 资源对话框 ═══════════ -->
+        <div class="modal-overlay" id="resourceModal">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <span class="modal-title">🗄️ <span data-i18n="r.title">Resources</span></span>
+                    <button class="mh-btn modal-close">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="resource-tabs" id="resourceTabs"></div>
+                    <div id="resourceTemplatesArea">
+                        <h5 style="font-weight:700;margin-bottom:8px;">Templates</h5>
+                        <div id="resourceTemplatesList"></div>
+                    </div>
+                    <div id="resourceListArea" style="margin-top:14px;">
+                        <h5 style="font-weight:700;margin-bottom:8px;">Resources</h5>
+                        <div id="resourceList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subagent 窗口容器 -->
+        <div id="subagentContainer"></div>
+
+        <!-- 工具箱 -->
+        <div class="toolbox-button" id="toolboxButton">🛠️</div>
+        <div class="toolbox" id="toolbox" style="display:none;">
+            <button class="tb-btn" id="toolRegistryBtn" title="Tool Registry / 工具注册表 (custom & third-party tools)">🔌</button>
+            <button class="tb-btn" id="sessionReplayBtn" title="会话回放 / Replay & Diff（事件时间线 · 播放 · 差异）">🎞</button>
+            <button class="tb-btn" id="skillsBtn" title="技能 / Skills（SKILL.md：方法论 + 输出模板 + 工具白名单）">🧩</button>
+            <button class="tb-btn" id="resetAllBtn" title="Reset All Config">🧹</button>
+            <button class="tb-btn" id="refreshToolsBtn" title="Refresh Tools (prefix cache miss)">⚡</button>
+            <button class="tb-btn" id="toolboxCloseBtn" title="Close Toolbox">✕</button>
+        </div>
+
+        <!-- ═══════════ 可插拔工具注册表对话框（Tool Registry） ═══════════ -->
+        <div class="modal-overlay" id="toolRegistryModal">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <span class="modal-title">🔌 <span>工具注册表 · Pluggable Tools</span></span>
+                    <button class="mh-btn" id="trLoadExample" title="载入示例工具">🧪</button>
+                    <button class="mh-btn" id="trExport" title="导出工具 JSON">⬇️</button>
+                    <button class="mh-btn" id="trImport" title="导入工具 JSON">⬆️</button>
+                    <button class="mh-btn modal-close" title="关闭">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="tr-hint">
+                        注册第三方 / 自定义工具；注册后立即进入模型可调用的工具列表（触发一次前缀缓存 miss）。
+                        三种执行体任选其一：<code>code</code>（内联 JS，可用 <code>args</code>/<code>ctx</code>，<code>return</code> 结果）、
+                        <code>http</code>（声明式请求，URL 支持 <code>{arg}</code> 插值）、
+                        <code>handler</code>（函数，仅第三方脚本用 <code>window.registerTool</code> 注册）。
+                    </div>
+                    <div class="tr-grid">
+                        <label class="tr-field">名称 name
+                            <input class="tr-input" id="trName" placeholder="my_tool" autocomplete="off">
+                        </label>
+                        <label class="tr-field">说明 description
+                            <input class="tr-input" id="trDesc" placeholder="这个工具做什么，什么时候该用…" autocomplete="off">
+                        </label>
+                        <label class="tr-field">类型 kind
+                            <select class="tr-input" id="trKind">
+                                <option value="code">code（内联 JS）</option>
+                                <option value="http">http（声明式请求）</option>
+                            </select>
+                        </label>
+                    </div>
+                    <label class="tr-block">参数 JSON Schema inputSchema
+                        <textarea class="tr-area" id="trSchema" rows="3">{"type":"object","properties":{},"required":[]}</textarea>
+                    </label>
+                    <label class="tr-block" id="trCodeWrap">执行体 · JS 源码（可用 args、ctx；用 return 回传结果）
+                        <textarea class="tr-area" id="trCode" rows="4" placeholder="return 'hello ' + (args.name || 'world');"></textarea>
+                    </label>
+                    <label class="tr-block" id="trHttpWrap" style="display:none;">执行体 · HTTP 规格 JSON（url 支持 {arg} 插值）
+                        <textarea class="tr-area" id="trHttp" rows="4" placeholder='{"url":"https://api.example.com/search?q={query}","method":"GET","headers":{"Accept":"application/json"}}'></textarea>
+                    </label>
+                    <div class="tr-actions">
+                        <button class="m-btn" id="trSubmit">注册工具</button>
+                        <button class="m-btn" id="trClearForm">清空表单</button>
+                        <label style="font-size:12px;color:#374151;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="trOverride"> 覆盖同名</label>
+                        <span class="tr-err" id="trErr"></span>
+                    </div>
+                    <div class="tr-list-head">已注册工具 <span id="trCount" style="color:#6b7280;font-weight:400;">(0)</span></div>
+                    <table class="tr-table">
+                        <thead>
+                            <tr><th style="width:44px;">启用</th><th style="width:180px;">名称</th><th style="width:120px;">来源/类型</th><th>说明</th><th style="width:40px;"></th></tr>
+                        </thead>
+                        <tbody id="trTbody"></tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <span class="spacer"></span>
+                    <button class="m-btn" id="trRefresh">刷新工具列表（1 次缓存 miss）</button>
+                    <button class="m-btn" id="trClearAll">清空全部</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════ Office 编辑器对话框 (docx/xlsx/pptx 双击浏览与保存) ═══════════ -->
+        <div class="modal-overlay" id="officeModal">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <span class="modal-title">📄 <span class="office-file-name" id="officeFileName">Office 编辑器</span></span>
+                    <button class="mh-btn" id="officeReloadBtn" title="从 almostnode FS 重新加载">🔄</button>
+                    <button class="mh-btn modal-close">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="office-loading hidden" id="officeLoading"><span class="loading"></span>&nbsp;正在加载 Office 编辑器…</div>
+                    <div class="office-tabs">
+                        <button type="button" class="office-tab active" data-tab="docx">📝 Word (docx)</button>
+                        <button type="button" class="office-tab" data-tab="xlsx">📊 Excel (xlsx)</button>
+                        <button type="button" class="office-tab" data-tab="pptx">📽️ PPT (pptx)</button>
+                    </div>
+                    <div class="office-scroll">
+        <!-- DOCX 内嵌编辑器（原 docx.html，合并后直接嵌入） -->
+        <div id="docxEditorRoot" class="office-editor-root active">
+
+  <div class="container">
+    <header>
+      <h1>DOCX 富文本编辑器</h1>
+      <p class="subtitle">导入、富文本编辑并导出 Word 文档</p>
+    </header>
+
+    <div class="instructions">
+      <h3>使用说明</h3>
+      <ol>
+        <li>点击“选择 DOCX 文件”上传 Word 文档，或点击“新建文档”直接编辑。</li>
+        <li>使用富文本工具栏设置标题、字体、字号、颜色、对齐、列表、链接和图片。</li>
+        <li>点击“导出为 Word”保存为 .docx 文件。</li>
+        <li>复杂 Word 格式无法 100% 无损保留，这是浏览器端 HTML 与 DOCX 互转的限制。</li>
+      </ol>
+    </div>
+
+    <div class="file-toolbar">
+      <div class="toolbar-left">
+        <div class="file-input-wrapper">
+          <button class="btn" id="docx_selectFileBtn" type="button">
+            <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
+            </svg>
+            选择 DOCX 文件
+          </button>
+          <input type="file" id="docx_fileInput" accept=".docx" />
+        </div>
+
+        <span id="docx_fileName" class="file-name"></span>
+      </div>
+
+      <div class="toolbar-right">
+        <button class="btn btn-secondary" id="docx_newDocBtn" type="button">
+          <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+          </svg>
+          新建文档
+        </button>
+
+        <button class="btn btn-success" id="docx_exportBtn" type="button">
+          <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+          </svg>
+          导出为 Word
+        </button>
+      </div>
+    </div>
+
+    <div class="rich-toolbar" id="docx_richToolbar">
+      <div class="tool-group">
+        <button class="tool-btn" type="button" data-command="undo" title="撤销">↶</button>
+        <button class="tool-btn" type="button" data-command="redo" title="重做">↷</button>
+      </div>
+
+      <div class="tool-group">
+        <select class="tool-select" id="docx_formatBlockSelect" title="段落格式">
+          <option value="P">正文</option>
+          <option value="H1">标题 1</option>
+          <option value="H2">标题 2</option>
+          <option value="H3">标题 3</option>
+          <option value="H4">标题 4</option>
+          <option value="BLOCKQUOTE">引用</option>
+          <option value="PRE">代码块</option>
+        </select>
+
+        <select class="tool-select" id="docx_fontNameSelect" title="字体">
+          <option value="Microsoft YaHei">微软雅黑</option>
+          <option value="SimSun">宋体</option>
+          <option value="SimHei">黑体</option>
+          <option value="KaiTi">楷体</option>
+          <option value="Arial">Arial</option>
+          <option value="Times New Roman">Times New Roman</option>
+          <option value="Courier New">Courier New</option>
+        </select>
+
+        <select class="tool-select" id="docx_fontSizeSelect" title="字号">
+          <option value="2">小</option>
+          <option value="3" selected>正常</option>
+          <option value="4">中大</option>
+          <option value="5">大</option>
+          <option value="6">特大</option>
+          <option value="7">超大</option>
+        </select>
+      </div>
+
+      <div class="tool-group">
+        <button class="tool-btn" type="button" data-command="bold" title="加粗"><b>B</b></button>
+        <button class="tool-btn" type="button" data-command="italic" title="斜体"><i>I</i></button>
+        <button class="tool-btn" type="button" data-command="underline" title="下划线"><u>U</u></button>
+        <button class="tool-btn" type="button" data-command="strikeThrough" title="删除线"><s>S</s></button>
+        <button class="tool-btn" type="button" data-command="removeFormat" title="清除格式">Tx</button>
+      </div>
+
+      <div class="tool-group">
+        <label class="color-label" title="文字颜色">
+          字色
+          <input type="color" id="docx_foreColorPicker" value="#000000" />
+        </label>
+        <label class="color-label" title="背景颜色">
+          背景
+          <input type="color" id="docx_backColorPicker" value="#ffff00" />
+        </label>
+      </div>
+
+      <div class="tool-group">
+        <button class="tool-btn" type="button" data-command="justifyLeft" title="左对齐">左</button>
+        <button class="tool-btn" type="button" data-command="justifyCenter" title="居中">中</button>
+        <button class="tool-btn" type="button" data-command="justifyRight" title="右对齐">右</button>
+        <button class="tool-btn" type="button" data-command="justifyFull" title="两端对齐">齐</button>
+      </div>
+
+      <div class="tool-group">
+        <button class="tool-btn" type="button" data-command="insertUnorderedList" title="无序列表">• 列表</button>
+        <button class="tool-btn" type="button" data-command="insertOrderedList" title="有序列表">1. 列表</button>
+        <button class="tool-btn" type="button" data-command="outdent" title="减少缩进">←</button>
+        <button class="tool-btn" type="button" data-command="indent" title="增加缩进">→</button>
+      </div>
+
+      <div class="tool-group">
+        <button class="tool-btn" type="button" id="docx_createLinkBtn" title="插入链接">链接</button>
+        <button class="tool-btn" type="button" id="docx_unlinkBtn" title="取消链接">取消链接</button>
+        <button class="tool-btn" type="button" id="docx_insertImageBtn" title="插入图片">图片</button>
+        <input type="file" id="docx_imageInput" accept="image/*" />
+      </div>
+
+      <div class="tool-group">
+        <button class="tool-btn" type="button" id="docx_insertTableBtn" title="插入 3x3 表格">表格</button>
+        <button class="tool-btn" type="button" id="docx_insertHrBtn" title="插入分割线">横线</button>
+      </div>
+    </div>
+
+    <div class="editor-container">
+      <div id="docx_docx-container" contenteditable="true">
+        <p class="placeholder">请上传 DOCX 文件或开始编辑新文档</p>
+      </div>
+    </div>
+
+    <div class="status-bar">
+      <span id="docx_charCount">字符数: 0</span>
+      <span id="docx_status">就绪</span>
+    </div>
+  </div>
+        </div>
+        <!-- XLSX 内嵌编辑器（原 xlsx.html，合并后直接嵌入） -->
+        <div id="xlsxEditorRoot" class="office-editor-root">
+
+<div class="container">
+
+  <header>
+    <h1>XLSX 富表格编辑器</h1>
+    <p class="subtitle">导入、编辑并导出 Excel 工作簿</p>
+  </header>
+
+  <div class="instructions">
+    <h3>使用说明</h3>
+    <ol>
+      <li>点击“选择 XLSX 文件”导入 Excel，也可以直接点击“新建工作簿”。</li>
+      <li>点击或 Shift+点击单元格选择区域，可批量设置字体、颜色、对齐和边框。</li>
+      <li>可以直接编辑单元格，也可以通过上方公式栏编辑内容或公式。</li>
+      <li>支持多个工作表、新增工作表、重命名和删除工作表。</li>
+      <li>点击“导出为 Excel”生成新的 .xlsx 文件。</li>
+      <li>图表、宏、数据透视表、条件格式等复杂 Excel 功能无法保证无损往返。</li>
+    </ol>
+  </div>
+
+  <!-- 文件 -->
+  <div class="file-toolbar">
+    <div class="toolbar-left">
+      <div class="file-input-wrapper">
+        <button class="btn" id="xlsx_selectFileBtn" type="button">
+          ↑ 选择 XLSX 文件
+        </button>
+
+        <input
+          type="file"
+          id="xlsx_fileInput"
+          accept=".xlsx,.xls,.xlsm,.xlsb"
+        />
+      </div>
+
+      <span id="xlsx_fileName" class="file-name"></span>
+    </div>
+
+    <div class="toolbar-right">
+      <button class="btn btn-secondary" id="xlsx_newWorkbookBtn">
+        ＋ 新建工作簿
+      </button>
+
+      <button class="btn btn-success" id="xlsx_exportBtn">
+        ↓ 导出为 Excel
+      </button>
+    </div>
+  </div>
+
+  <!-- 格式工具栏 -->
+  <div class="rich-toolbar">
+
+    <div class="tool-group">
+      <button class="tool-btn" id="xlsx_undoBtn" title="撤销">↶</button>
+      <button class="tool-btn" id="xlsx_redoBtn" title="重做">↷</button>
+    </div>
+
+    <div class="tool-group">
+      <select id="xlsx_fontNameSelect" class="tool-select">
+        <option value="Microsoft YaHei">微软雅黑</option>
+        <option value="SimSun">宋体</option>
+        <option value="SimHei">黑体</option>
+        <option value="KaiTi">楷体</option>
+        <option value="Arial">Arial</option>
+        <option value="Calibri" selected>Calibri</option>
+        <option value="Times New Roman">Times New Roman</option>
+      </select>
+
+      <select id="xlsx_fontSizeSelect" class="tool-select">
+        <option value="8">8</option>
+        <option value="9">9</option>
+        <option value="10">10</option>
+        <option value="11" selected>11</option>
+        <option value="12">12</option>
+        <option value="14">14</option>
+        <option value="16">16</option>
+        <option value="18">18</option>
+        <option value="20">20</option>
+        <option value="24">24</option>
+        <option value="28">28</option>
+        <option value="36">36</option>
+      </select>
+    </div>
+
+    <div class="tool-group">
+      <button class="tool-btn" id="xlsx_boldBtn"><b>B</b></button>
+      <button class="tool-btn" id="xlsx_italicBtn"><i>I</i></button>
+      <button class="tool-btn" id="xlsx_underlineBtn"><u>U</u></button>
+    </div>
+
+    <div class="tool-group">
+      <label class="color-label">
+        字色
+        <input type="color" id="xlsx_fontColorPicker" value="#000000" />
+      </label>
+
+      <label class="color-label">
+        填充
+        <input type="color" id="xlsx_fillColorPicker" value="#ffff00" />
+      </label>
+    </div>
+
+    <div class="tool-group">
+      <button class="tool-btn" data-align="left">左</button>
+      <button class="tool-btn" data-align="center">中</button>
+      <button class="tool-btn" data-align="right">右</button>
+    </div>
+
+    <div class="tool-group">
+      <button class="tool-btn" data-valign="top">上</button>
+      <button class="tool-btn" data-valign="center">垂中</button>
+      <button class="tool-btn" data-valign="bottom">下</button>
+    </div>
+
+    <div class="tool-group">
+      <select id="xlsx_numberFormatSelect" class="tool-select">
+        <option value="General">常规</option>
+        <option value="0">整数</option>
+        <option value="0.00">数字 0.00</option>
+        <option value="0%">百分比</option>
+        <option value="0.00%">百分比 0.00%</option>
+        <option value="#,##0">千位分隔</option>
+        <option value="#,##0.00">千位 + 2 位小数</option>
+        <option value="yyyy-mm-dd">日期</option>
+        <option value="yyyy-mm-dd hh:mm:ss">日期时间</option>
+        <option value="@">文本</option>
+      </select>
+    </div>
+
+    <div class="tool-group">
+      <button class="tool-btn" id="xlsx_borderBtn">边框</button>
+      <button class="tool-btn" id="xlsx_clearFormatBtn">清除格式</button>
+    </div>
+
+    <div class="tool-group">
+      <button class="tool-btn" id="xlsx_mergeBtn">合并</button>
+      <button class="tool-btn" id="xlsx_unmergeBtn">取消合并</button>
+    </div>
+
+    <div class="tool-group">
+      <button class="tool-btn" id="xlsx_addRowsBtn">+10 行</button>
+      <button class="tool-btn" id="xlsx_addColsBtn">+5 列</button>
+    </div>
+
+    <div class="tool-group">
+      <button class="tool-btn" id="xlsx_renameSheetBtn">重命名表</button>
+      <button class="tool-btn" id="xlsx_deleteSheetBtn">删除表</button>
+    </div>
+
+  </div>
+
+  <!-- 公式栏 -->
+  <div class="formula-toolbar">
+    <input
+      id="xlsx_nameBox"
+      class="tool-input"
+      value="A1"
+      readonly
+    />
+
+    <div class="fx">fx</div>
+
+    <input
+      id="xlsx_formulaInput"
+      class="tool-input"
+      placeholder="输入内容或公式，例如 =SUM(A1:A10)"
+    />
+  </div>
+
+  <!-- 表格 -->
+  <div class="editor-container">
+
+    <div class="sheet-wrapper" id="xlsx_sheetWrapper">
+      <table id="xlsx_sheetTable"></table>
+    </div>
+
+  </div>
+
+  <!-- Sheet Tabs -->
+  <div class="sheet-tabs-bar">
+    <button class="add-sheet-btn" id="xlsx_addSheetBtn" title="新增工作表">
+      +
+    </button>
+
+    <div id="xlsx_sheetTabs"></div>
+  </div>
+
+  <div class="status-bar">
+    <span id="xlsx_cellStatus">当前单元格: A1</span>
+    <span id="xlsx_selectionStatus">选择范围: A1</span>
+    <span id="xlsx_status">就绪</span>
+  </div>
+
+</div>
+        </div>
+        <!-- PPTX 内嵌编辑器（原 pptx.html，合并后直接嵌入） -->
+        <div id="pptxEditorRoot" class="office-editor-root">
+
+  <div class="container">
+    <header>
+      <h1>PPTX 富文本编辑器</h1>
+      <p class="subtitle">创建、幻灯片多页富文本编辑并导出 PowerPoint 演示文稿</p>
+    </header>
+
+    <div class="instructions">
+      <h3>使用说明</h3>
+      <ol>
+        <li>点击“选择 PPTX 文件”上传演示文稿：会尽量保留原始版式与文字格式（位置/大小、字体/字号/颜色、加粗斜体、背景色、图片、表格等），导入后仍可继续编辑。</li>
+        <li>左侧侧边栏可增加、删除或切换幻灯片页面。</li>
+        <li>使用富文本工具栏设置标题、字体、字号、文本颜色、背景色、对齐方式、图片与表格。</li>
+        <li>点击“导出为 PPTX”将所有幻灯片保存为标准的 .pptx 文件。</li>
+      </ol>
+    </div>
+
+    <div class="file-toolbar">
+      <div class="toolbar-left">
+        <div class="file-input-wrapper">
+          <button class="btn" id="pptx_selectFileBtn" type="button">
+            <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
+            </svg>
+            选择 PPTX 文件
+          </button>
+          <input type="file" id="pptx_fileInput" accept=".pptx" />
+        </div>
+
+        <span id="pptx_fileName" class="file-name"></span>
+      </div>
+
+      <div class="toolbar-right">
+        <button class="btn btn-secondary" id="pptx_newDocBtn" type="button">
+          <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+          </svg>
+          新建演示文稿
+        </button>
+
+        <button class="btn btn-success" id="pptx_exportBtn" type="button">
+          <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+          </svg>
+          导出为 PPTX
+        </button>
+      </div>
+    </div>
+
+    <div class="rich-toolbar" id="pptx_richToolbar">
+      <div class="tool-group">
+        <button class="tool-btn" type="button" data-command="undo" title="撤销">↶</button>
+        <button class="tool-btn" type="button" data-command="redo" title="重做">↷</button>
+      </div>
+
+      <div class="tool-group">
+        <select class="tool-select" id="pptx_formatBlockSelect" title="段落格式">
+          <option value="P">正文</option>
+          <option value="H1">大标题 (H1)</option>
+          <option value="H2">副标题 (H2)</option>
+          <option value="H3">小标题 (H3)</option>
+          <option value="BLOCKQUOTE">引用块</option>
+          <option value="PRE">代码块</option>
+        </select>
+
+        <select class="tool-select" id="pptx_fontNameSelect" title="字体">
+          <option value="Microsoft YaHei">微软雅黑</option>
+          <option value="SimSun">宋体</option>
+          <option value="SimHei">黑体</option>
+          <option value="KaiTi">楷体</option>
+          <option value="Arial">Arial</option>
+          <option value="Times New Roman">Times New Roman</option>
+          <option value="Courier New">Courier New</option>
+        </select>
+
+        <select class="tool-select" id="pptx_fontSizeSelect" title="字号">
+          <option value="2">小</option>
+          <option value="3" selected>正常</option>
+          <option value="4">中大</option>
+          <option value="5">大</option>
+          <option value="6">特大</option>
+          <option value="7">超大</option>
+        </select>
+      </div>
+
+      <div class="tool-group">
+        <button class="tool-btn" type="button" data-command="bold" title="加粗"><b>B</b></button>
+        <button class="tool-btn" type="button" data-command="italic" title="斜体"><i>I</i></button>
+        <button class="tool-btn" type="button" data-command="underline" title="下划线"><u>U</u></button>
+        <button class="tool-btn" type="button" data-command="strikeThrough" title="删除线"><s>S</s></button>
+        <button class="tool-btn" type="button" data-command="removeFormat" title="清除格式">Tx</button>
+      </div>
+
+      <div class="tool-group">
+        <label class="color-label" title="文字颜色">
+          字色
+          <input type="color" id="pptx_foreColorPicker" value="#000000" />
+        </label>
+        <label class="color-label" title="幻灯片背景色">
+          背景色
+          <input type="color" id="pptx_slideBgColorPicker" value="#ffffff" />
+        </label>
+      </div>
+
+      <div class="tool-group">
+        <button class="tool-btn" type="button" data-command="justifyLeft" title="左对齐">左</button>
+        <button class="tool-btn" type="button" data-command="justifyCenter" title="居中">中</button>
+        <button class="tool-btn" type="button" data-command="justifyRight" title="右对齐">右</button>
+        <button class="tool-btn" type="button" data-command="justifyFull" title="两端对齐">齐</button>
+      </div>
+
+      <div class="tool-group">
+        <button class="tool-btn" type="button" data-command="insertUnorderedList" title="无序列表">• 列表</button>
+        <button class="tool-btn" type="button" data-command="insertOrderedList" title="有序列表">1. 列表</button>
+        <button class="tool-btn" type="button" data-command="outdent" title="减少缩进">←</button>
+        <button class="tool-btn" type="button" data-command="indent" title="增加缩进">→</button>
+      </div>
+
+      <div class="tool-group">
+        <button class="tool-btn" type="button" id="pptx_createLinkBtn" title="插入链接">链接</button>
+        <button class="tool-btn" type="button" id="pptx_unlinkBtn" title="取消链接">取消链接</button>
+        <button class="tool-btn" type="button" id="pptx_insertImageBtn" title="插入图片">图片</button>
+        <input type="file" id="pptx_imageInput" accept="image/*" />
+      </div>
+
+      <div class="tool-group">
+        <button class="tool-btn" type="button" id="pptx_insertTableBtn" title="插入 3x3 表格">表格</button>
+        <button class="tool-btn" type="button" id="pptx_insertHrBtn" title="插入分割线">横线</button>
+      </div>
+    </div>
+
+    <div class="app-workspace">
+      <!-- 幻灯片页面列表 (Sidebar) -->
+      <div class="slide-sidebar">
+        <div class="sidebar-header">
+          <span>幻灯片 ( <span id="pptx_slideCountTag">1</span> )</span>
+          <button class="btn btn-secondary" id="pptx_addSlideBtn" style="padding:4px 8px; font-size:12px;">+ 页</button>
+        </div>
+        <div class="thumbnail-list" id="pptx_thumbnailList"></div>
+        <button class="btn btn-danger" id="pptx_deleteSlideBtn" style="padding:6px; font-size:12px; margin-top: auto;">删除当前页</button>
+      </div>
+
+      <!-- 当前幻灯片编辑区域 -->
+      <div class="editor-container">
+        <div id="pptx_slide-canvas" class="slide-canvas" contenteditable="true">
+          <h1>幻灯片标题</h1>
+          <p>请输入演示文稿正文内容...</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="status-bar">
+      <span id="pptx_charCount">字符数: 0</span>
+      <span id="pptx_slideIndexStatus">页码: 1 / 1</span>
+      <span id="pptx_status">就绪</span>
+    </div>
+  </div>
+        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <span class="office-path" id="officePath" title=""></span>
+                    <span class="spacer"></span>
+                    <button class="m-btn outline" id="officeSaveAsBtn">📝 另存为…</button>
+                    <button class="m-btn outline" id="officeDownloadBtn">⬇️ 下载</button>
+                    <button class="m-btn primary" id="officeSaveBtn">💾 保存到 Node FS</button>
+                </div>
+            </div>
+        </div>
+
+    <!-- DOCX 内嵌编辑器脚本（IIFE 隔离） -->
+    <script src="./assets/js/docx-editor.js"></script>
+    <!-- XLSX 内嵌编辑器脚本（IIFE 隔离） -->
+    <script src="./assets/js/xlsx-editor.js"></script>
+    <!-- PPTX 内嵌编辑器脚本（IIFE 隔离） -->
+    <script src="./assets/js/pptx-editor.js"></script>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════════════
+         LSP（Language Server Protocol）诊断集成 —— TypeScript / tsserver
+         ─────────────────────────────────────────────────────────────────────────
+         · 语言服务器：TypeScript Language Service（即 tsserver 的核心引擎）。
+           引擎与 lib.*.d.ts 声明按需懒加载（./lsp/typescript.js、./lsp/ts-libs.js），
+           不参与首屏渲染；接入 LSP 前不会下载这 ~10MB 资源。
+         · 传输层：一对 MessageChannel 端口承载 JSON-RPC 2.0 报文；
+           客户端（编辑器）<-> 服务器（tsserver 引擎）以真正的 LSP 消息通信。
+         · 诊断渲染：CodeMirror 5 —— lint 风格 gutter 标记 + 波浪下划线 + 悬浮提示，
+           顶部状态徽标实时显示错误/警告数量，点击可跳转到下一个问题。
+         · 已实现：initialize / initialized / shutdown / exit、
+                   textDocument/didOpen|didChange|didClose、
+                   textDocument/publishDiagnostics（服务端 -> 客户端）、
+                   textDocument/hover、textDocument/completion。
+         ══════════════════════════════════════════════════════════════════════════ -->
+    <script src="./assets/js/lsp-boot.js"></script>
+
+    <!-- 可插拔工具注册表（Pluggable Tool Registry）：纯逻辑模块，主脚本把它映射为内置 MCP Server
+         `tool-registry` 注入 window.mcpServers，从而零侵入接入现有工具调用循环；第三方脚本亦可通过
+         window.registerTool(...) 自行注册。 -->
+    <script src="./tool-registry.js"></script>
+    <!-- 工具审批闸门（纯逻辑，UMD）：写/改/删/执行 → allow-once / allow-session / deny。
+         宿主（assets/js/22-approval-ui.js）注入显隐/模态，由 mcpStore.callTool 调用。 -->
+    <script src="./approval.js"></script>
+    <!-- HTML 白名单净化器：模型/网页/文档内容进 innerHTML 前必须过一遍（防 XSS） -->
+    <script src="./sanitize.js"></script>
+
+    <script src="./assets/js/01-core.js"></script>
+    <script src="./assets/js/02-agent-tools.js"></script>
+    <script src="./assets/js/03-node-tools.js"></script>
+    <!-- file_to_image 纯逻辑核心（格式识别/输出命名/dataURL 解码），先于 04-doc-tools 加载 -->
+    <script src="./file-to-image-core.js"></script>
+    <script src="./assets/js/04-doc-tools.js"></script>
+    <script src="./read-window.js"></script>
+    <script src="./assets/js/05-fs-tools.js"></script>
+    <script src="./assets/js/06-orchestration.js"></script>
+    <!-- 工具结果溢出（spill）/ 执行截止（guard）/ 网页搜索（web_search）：纯逻辑模块，须在 07 之前 -->
+    <script src="./spill.js"></script>
+    <script src="./guard.js"></script>
+    <script src="./web-search.js"></script>
+    <script src="./sandbox-policy.js"></script>
+    <!-- 内置 PostgreSQL（PGlite）MCP 工具核心：工具定义 + 结果格式化（纯逻辑，可 node 单测），须在 07-mcp.js 之前 -->
+    <script src="./db-mcp-core.js"></script>
+    <script src="./assets/js/07-mcp.js"></script>
+    <!-- 接口配置固化（应用目录 config/interface.json）纯逻辑：白名单抽取 + 密钥剥离 + 回读合并，须在 08-ui-store 之前 -->
+    <script src="./config-file.js"></script>
+    <script src="./assets/js/08-ui-store.js"></script>
+    <script src="./assets/js/09-chat-store.js"></script>
+    <script src="./assets/js/10-prefix-cache.js"></script>
+    <script src="./assets/js/11-completion.js"></script>
+    <script src="./assets/js/12-render.js"></script>
+    <script src="./assets/js/13-subagent-ui.js"></script>
+    <script src="./assets/js/14-ui-dialogs.js"></script>
+    <!-- 文本原样保真（EOL/BOM/编码）+ 写回前磁盘状态判定，须在 15 之前加载 -->
+    <script src="./eol-meta.js"></script>
+    <script src="./sync-guard.js"></script>
+    <!-- 块级接受 / 交付门禁 / 结构化改动摘要（纯逻辑模块，可 node 单测） -->
+    <script src="./hunk-select.js"></script>
+    <script src="./delivery-summary.js"></script>
+    <script src="./type-gate.js"></script>
+    <!-- 浏览器构建的 xlsx 缺 Node fs：把 XLSX.readFile/writeFile 桥接到 VFS fs（纯逻辑模块，可 node 单测） -->
+    <script src="./xlsx-fs-bridge.js"></script>
+    <script src="./assets/js/15-pgpy-runtime.js"></script>
+    <script src="./assets/js/16-pgpy-editor.js"></script>
+    <!-- 输入框「随时可点/可输入」兜底：被透明浮层/残留遮罩盖住时按坐标把焦点抢回 textarea（须在 17 之前加载） -->
+    <script src="./assets/js/input-focus-guard.js"></script>
+    <script src="./assets/js/17-pgpy-fsui.js"></script>
+    <!-- 会话事件日志（append-only 事实源）：对话落盘「应用目录/messages/」，支持 replay/fork/崩溃恢复 -->
+    <script src="./assets/js/18-session-log.js"></script>
+    <!-- Plan 模式：在既有 planStore 之上加层（Ask/Plan/Craft + 富步骤卡 + 风险审批门） -->
+    <script src="./assets/js/19-plan-mode.js"></script>
+    <!-- 会话事实源：回放 / 分叉 / 差异 UI（事件时间线 · 步进播放 · 并排 diff） -->
+    <script src="./assets/js/20-session-replay-ui.js"></script>
+    <!-- ⟲ 撤销上次写回：同步批次快照（写回前基线）→ 按批次回退磁盘 + vfs -->
+    <script src="./assets/js/21-sync-undo.js"></script>
+    <!-- 工具审批 UI：策略读写 + 模态队列 + 倒计时（写 / 改 / 删 / 执行 四类操作逐次确认） -->
+    <script src="./assets/js/22-approval-ui.js"></script>
+    <!-- 硬切窗口（Hard-Cut Window）：上下文＝工作台，记忆＝工作笔记 + 历史指针 + 可查询转录历史。
+         接近上限不再压缩，直接归档旧对话 → 开干净新窗口，并提供 note_write / search_transcript 等工具。 -->
+    <script src="./assets/js/23-hard-cut.js"></script>
+    <!-- 任务中心（任务态 / 产物 / 变更 diff / 中断恢复 + planner→executor→verifier 接线） -->
+    <script src="./tasks.js"></script>
+    <script src="./assets/js/24-task-center-ui.js"></script>
+    <!-- 工作区上下文：AGENTS.md / 当前时间 / 工作目录注入 + working_directory 工具 -->
+    <script src="./context/workspace-context.js"></script>
+    <script src="./context/workspace-context-bootstrap.js"></script>
+    <!-- P1：子代理控制面 / 后台任务 / 会话检索 / 多 provider 模型路由 -->
+    <script src="./agent-control.js"></script>
+    <script src="./agent-control-bootstrap.js"></script>
+    <script src="./jobs.js"></script>
+    <script src="./jobs-bootstrap.js"></script>
+    <script src="./session-trace.js"></script>
+    <script src="./session-trace-bootstrap.js"></script>
+    <script src="./provider-config.js"></script>
+    <script src="./provider-config-bootstrap.js"></script>
+    <!-- CDP 直连浏览器控制：AI Agent 通过 webContents.debugger 操控内置浏览器标签
+         （纯逻辑核心 cdp-core.js + 工具接线 browser-control-bootstrap.js） -->
+    <script src="./cdp-core.js"></script>
+    <script src="./browser-control-bootstrap.js"></script>
+    <!-- 技能层：SKILL.md（兼容 OpenClaw / WorkBuddy），编译进 system 前缀 -->
+    <script src="./skills/skill-store.js"></script>
+    <script src="./skills/skill-compose.js"></script>
+    <script src="./skills/builtin-skills.js"></script>
+    <script src="./skills/skill-bootstrap.js"></script>
+    <script src="./skills/skills-ui.js"></script>
+
+    <!-- 本地记忆层：IndexedDB + 向量/BM25 混合检索 + RRF + 画像注入 + 会话检索（可选模块，失败不影响主程序） -->
+    <script src="./memory/memory-layer.js"></script>
+    <script src="./memory/memory-bootstrap.js"></script>
+    <!-- 知识库层：文档摄取 → 混合检索引用问答 → 知识健康（重复/出入检测+差异高亮、
+         复审周期、差评归因、分配到人）。纯前端 IndexedDB；异常静默回退不影响对话。 -->
+    <script src="./knowledge/kb-store.js"></script>
+    <script src="./knowledge/kb-ingest.js"></script>
+    <script src="./knowledge/kb-search.js"></script>
+    <script src="./knowledge/kb-qa.js"></script>
+    <script src="./knowledge/kb-steward.js"></script>
+    <script src="./knowledge/kb-health/divergence.js"></script>
+    <script src="./knowledge/kb-health/duplicate.js"></script>
+    <script src="./knowledge/kb-health/detector.js"></script>
+    <script src="./knowledge/kb-health/review.js"></script>
+    <script src="./knowledge/kb-health/dispute.js"></script>
+    <script src="./knowledge/kb-health/settle.js"></script>
+    <script src="./knowledge/kb-todo.js"></script>
+    <script src="./knowledge/kb-source.js"></script>
+    <script src="./knowledge/kb-bootstrap.js"></script>
+    <script src="./knowledge/kb-ui.js"></script>
+    <!-- Super-agent 优化方案（模块 2/3/4/6）纯逻辑模块 + 运行时装配。
+         均为 UMD 独立模块：仅注册全局对象，默认不改变既有行为；异常静默不影响主程序。 -->
+    <script src="./trigger/trigger-filter.js"></script>
+    <script src="./trigger/trigger-router.js"></script>
+    <script src="./channel-format.js"></script>
+    <script src="./watchdog/watchdog-core.js"></script>
+    <script src="./assets/js/27-worker-pool.js"></script>
+    <script src="./assets/js/26-router-session.js"></script>
+    <script src="./assets/js/30-async-tools.js"></script>
+    <script src="./assets/js/32-prompt-queue.js"></script>
+    <script src="./assets/js/28-trigger-bus.js"></script>
+    <script src="./assets/js/31-watchdog.js"></script>
+    <script src="./runner/runner-core.js"></script>
+    <script src="./daemon/agentd.js"></script>
+    <script src="./super-agent-bootstrap.js"></script>
+    <!-- 内嵌 PostgreSQL：打开数据库视图按钮的入口 -->
+    <script src="./assets/js/25-database-open.js"></script>
+</body>
+
+</html>

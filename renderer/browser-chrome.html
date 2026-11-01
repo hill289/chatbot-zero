@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<title>Chrome</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; height: 100%; overflow: hidden;
+    font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+    font-size: 12px; color: #e6e6e6; background: #2b2b2b;
+    -webkit-user-select: none; user-select: none;
+  }
+  #chrome { display: flex; flex-direction: column; height: 100%; }
+
+  /* ── 标签栏 ── */
+  #tabstrip {
+    display: flex; align-items: flex-end; height: 40px;
+    padding: 4px 4px 0 4px; background: #1e1e1e;
+  }
+  #tabs { display: flex; align-items: flex-end; gap: 2px; overflow: hidden; flex: 1; }
+  .tab {
+    display: flex; align-items: center; gap: 6px;
+    min-width: 72px; max-width: 220px; height: 32px; padding: 0 8px;
+    border-radius: 8px 8px 0 0; background: #2b2b2b; color: #b8b8b8;
+    white-space: nowrap; flex: 0 1 200px;
+  }
+  .tab:hover { background: #333; }
+  .tab.active { background: #3a3a3a; color: #fff; }
+  .tab .fav { flex: none; width: 14px; text-align: center; opacity: 0.9; }
+  .tab .title { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+  .tab .close {
+    flex: none; width: 16px; height: 16px; line-height: 15px; text-align: center;
+    border-radius: 50%; color: #999; font-size: 11px;
+  }
+  .tab .close:hover { background: #5a5a5a; color: #fff; }
+  #newtab {
+    flex: none; width: 28px; height: 28px; margin: 0 2px 2px 4px;
+    border: none; border-radius: 6px; background: transparent;
+    color: #e6e6e6; font-size: 18px; line-height: 1; cursor: default;
+  }
+  #newtab:hover { background: #3a3a3a; }
+
+  /* ── 工具栏 ── */
+  #toolbar {
+    display: flex; align-items: center; gap: 6px;
+    height: 48px; padding: 0 8px; background: #3a3a3a;
+  }
+  #toolbar button {
+    flex: none; width: 30px; height: 30px; border: none; border-radius: 6px;
+    background: transparent; color: #e6e6e6; font-size: 15px; line-height: 1; cursor: default;
+  }
+  #toolbar button:hover:not(:disabled) { background: #4a4a4a; }
+  #toolbar button:disabled { color: #6a6a6a; }
+  #address {
+    flex: 1; height: 30px; min-width: 0; padding: 0 12px;
+    border: 1px solid #555; border-radius: 15px; background: #2b2b2b;
+    color: #e6e6e6; font-size: 12px; outline: none;
+    -webkit-user-select: text; user-select: text;
+  }
+  #address:focus { border-color: #4a90d9; background: #1e1e1e; }
+</style>
+</head>
+<body>
+  <div id="chrome">
+    <div id="tabstrip">
+      <div id="tabs"></div>
+      <button id="newtab" title="新标签页 (Ctrl+T)">+</button>
+    </div>
+    <div id="toolbar">
+      <button id="back" title="后退">‹</button>
+      <button id="forward" title="前进">›</button>
+      <button id="reload" title="刷新 (Ctrl+R)">⟳</button>
+      <button id="home" title="主页">⌂</button>
+      <input id="address" type="text" spellcheck="false" placeholder="搜索或输入网址 / 本地路径" />
+      <button id="devtools" title="开发者工具 (Ctrl+Shift+I)">{ }</button>
+    </div>
+  </div>
+  <script src="./browser-chrome.js"></script>
+</body>
+</html>
