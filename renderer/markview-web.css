@@ -1,0 +1,155 @@
+/* markview-web — styles for the justified line boxes and block furniture.
+ * The line boxes themselves carry their geometry inline (width, height,
+ * word-spacing, letter-spacing); this file only sets family, colour and the
+ * non-paragraph blocks that are rendered the ordinary HTML way. */
+
+.markview {
+	--mvw-ink: #1a1a1a;
+	--mvw-rule: #d9d9d9;
+	--mvw-muted: #555555;
+	--mvw-code-bg: #f3f2f0;
+	color: var(--mvw-ink);
+	background: #ffffff;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+}
+
+.markview.mvw-dark {
+	--mvw-ink: #e8e6e1;
+	--mvw-rule: #3a3a3a;
+	--mvw-muted: #a8a8a8;
+	--mvw-code-bg: #26262a;
+	background: #17171a;
+	color: var(--mvw-ink);
+}
+
+/* One decided line = one box. Never wraps; justification is expressed
+ * through word-spacing / letter-spacing set per line. */
+.markview .mvw-line {
+	white-space: nowrap;
+	overflow: visible;
+}
+
+/* Inline math and code keep their own internal fit: the line's letterfit
+ * must not creep into KaTeX's glyph spacing or the code face. */
+.markview .mvw-line .katex,
+.markview .mvw-line .mvw-code {
+	letter-spacing: 0;
+}
+
+.markview .mvw-p {
+	margin: 0 0 0.9em;
+}
+
+.markview .mvw-heading {
+	line-height: 1.2;
+	font-weight: 700;
+}
+
+.markview .mvw-code {
+	font-family: "Noto Sans Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+	font-size: 0.9em;
+	background: var(--mvw-code-bg);
+	padding: 0.08em 0.32em;
+	border-radius: 3px;
+}
+
+.markview .mvw-link {
+	color: inherit;
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
+.markview .mvw-pre {
+	background: var(--mvw-code-bg);
+	padding: 12px 14px;
+	border-radius: 6px;
+	overflow-x: auto;
+	font-family: "Noto Sans Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+	font-size: 0.86em;
+	line-height: 1.5;
+}
+
+.markview .mvw-quote {
+	border-left: 3px solid var(--mvw-rule);
+	color: var(--mvw-muted);
+	margin: 0 0 0.9em;
+	padding-left: 1.2em;
+}
+
+.markview .mvw-list {
+	margin: 0 0 0.9em;
+	padding-left: 0;
+	list-style-position: outside;
+}
+
+.markview .mvw-table {
+	border-collapse: collapse;
+	width: 100%;
+	margin: 0 0 0.9em;
+}
+
+.markview .mvw-table th,
+.markview .mvw-table td {
+	border: 1px solid var(--mvw-rule);
+	padding: 4px 8px;
+	vertical-align: top;
+}
+
+.markview .mvw-display-math {
+	text-align: center;
+	margin: 1em 0;
+	overflow-x: auto;
+}
+
+.markview .mvw-mermaid {
+	text-align: center;
+	margin: 1em 0;
+}
+
+.markview img {
+	max-width: 100%;
+}
+
+
+/* ---- A4 / paginated sheets ---------------------------------------------- */
+
+.markview-pages {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 26px;
+}
+
+/* A sheet carries the `markview` class too, so every block style above keeps
+ * applying inside a page. Paper stays light regardless of the dark theme. */
+.mvw-sheet {
+	position: relative;
+	box-sizing: border-box;
+	background: #ffffff;
+	border-radius: 2px;
+	box-shadow:
+		0 1px 3px rgba(0, 0, 0, 0.16),
+		0 12px 40px rgba(0, 0, 0, 0.12);
+	overflow: hidden;
+}
+
+.mvw-page-body {
+	box-sizing: border-box;
+	overflow: hidden;
+}
+
+.mvw-page-body .mvw-line {
+	white-space: nowrap;
+	overflow: visible;
+}
+
+.mvw-page-number {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 8mm;
+	text-align: center;
+	font-size: 11px;
+	color: #8a8a8a;
+}
